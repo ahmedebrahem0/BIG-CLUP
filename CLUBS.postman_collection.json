@@ -1,0 +1,228 @@
+{
+  "info": {
+    "_postman_id": "6c717ad4-10a4-4fd5-ba49-a15ce84daf57",
+    "name": "CLUBS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56381549"
+  },
+  "item": [
+    {
+      "name": "ClubsList",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/items/clubs/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "items",
+            "clubs",
+            ""
+          ]
+        },
+        "description": "StartFragment\n\n## ClubsList API\n\nEndpoint شامل لإدارة الأندية (Clubs)، يدعم العمليات الأساسية: جلب، إضافة، تعديل، وحذف.\n\n**Base URL:** `{{base_url}}`\n\n---\n\n## Endpoints\n\n### 1\\. `GET /items/clubs/` — جلب كل الأندية\n\nيرجع قائمة بجميع الأندية المسجلة في قاعدة البيانات.\n\n**Response** **`200 OK`****:**\n\nJSON\n\n```\n[  { \"id\": 1, \"name\": \"اسم النادي\" },  { \"id\": 2, \"name\": \"أنكر ميسي\" }]\n\n ```\n\n---\n\n### 2\\. `GET /items/clubs/{pk}/` — جلب نادي بالـ ID\n\nيرجع بيانات نادي محدد بناءً على الـ `pk` (Primary Key).\n\n**Path Parameter:**\n\n| Parameter | Type | Description |\n| --- | --- | --- |\n| `pk` | integer | المعرّف الفريد للنادي |\n\n**Response** **`200 OK`****:**\n\nJSON\n\n```\n{ \"id\": 2, \"name\": \"أنكر ميسي\" }\n\n ```\n\n**Response** **`404 Not Found`****:** إذا لم يكن النادي موجوداً.\n\n---\n\n### 3\\. `POST /items/clubs/` — إضافة نادي جديد\n\nيُنشئ نادياً جديداً بناءً على البيانات المُرسلة في الـ body.\n\n**Request Body (JSON):**\n\nJSON\n\n```\n{ \"name\": \"اسم النادي الجديد\" }\n\n ```\n\n**Response** **`201 Created`****:**\n\nJSON\n\n```\n{ \"id\": 3, \"name\": \"اسم النادي الجديد\" }\n\n ```\n\n**Response** **`400 Bad Request`****:** إذا كانت البيانات غير صالحة.\n\n---\n\n### 4\\. `PUT /items/clubs/{pk}/` — تعديل نادي موجود\n\nيُحدّث بيانات نادي موجود بالكامل بناءً على الـ `pk`.\n\n**Path Parameter:**\n\n| Parameter | Type | Description |\n| --- | --- | --- |\n| `pk` | integer | المعرّف الفريد للنادي |\n\n**Request Body (JSON):**\n\nJSON\n\n```\n{ \"name\": \"الاسم المعدّل\" }\n\n ```\n\n**Response** **`200 OK`****:**\n\nJSON\n\n```\n{ \"id\": 2, \"name\": \"الاسم المعدّل\" }\n\n ```\n\n**Response** **`404 Not Found`****:** إذا لم يكن النادي موجوداً.  \n**Response** **`400 Bad Request`****:** إذا كانت البيانات غير صالحة.\n\n---\n\n### 5\\. `DELETE /items/clubs/{pk}/` — حذف نادي\n\nيحذف نادياً محدداً بناءً على الـ `pk`.\n\n**Path Parameter:**\n\n| Parameter | Type | Description |\n| --- | --- | --- |\n| `pk` | integer | المعرّف الفريد للنادي |\n\n**Response** **`204 No Content`****:** تم الحذف بنجاح.  \n**Response** **`404 Not Found`****:** إذا لم يكن النادي موجوداً.\n\n---\n\n## Response Fields\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `id` | integer | المعرّف الفريد للنادي |\n| `name` | string | اسم النادي |\n\nEndFragment"
+      },
+      "response": []
+    },
+    {
+      "name": "CategoryList",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/items/categories/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "items",
+            "categories",
+            ""
+          ]
+        },
+        "description": "## Category API\n\nThis endpoint manages **product categories** with support for hierarchical (parent-child) structure.\n\n**Base URL:** `{{base_url}}/items/categories/`\n\n---\n\n### Endpoints\n\n| Method | URL | Description |\n| --- | --- | --- |\n| GET | `/categories/` | Get all categories |\n| GET | `/categories/{id}/` | Get a single category by ID |\n| POST | `/categories/` | Create a new category |\n| PUT | `/categories/{id}/` | Update an existing category |\n| DELETE | `/categories/{id}/` | Delete a category |\n\n---\n\n### Response Schema\n\n``` json\n{\n  \"id\": 1,\n  \"name\": \"string\",\n  \"parent\": null,\n  \"parent_name\": null\n}\n\n ```\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `id` | integer | Unique identifier for the category |\n| `name` | string | Category name (supports Arabic) |\n| `parent` | integer | null | ID of the parent category (null if top-level) |\n| `parent_name` | string | null | Name of the parent category (null if top-level) |\n\n---\n\n### GET — List All Categories\n\n**Request:**\n\n```\nGET {{base_url}}/items/categories/\n\n ```\n\n**Response** **`200 OK`****:**\n\n``` json\n[\n  {\"id\": 1, \"name\": \"مفروشات\", \"parent\": null, \"parent_name\": null},\n  {\"id\": 2, \"name\": \"كراسي\", \"parent\": null, \"parent_name\": null},\n  {\"id\": 3, \"name\": \"كراسي خشب\", \"parent\": 2, \"parent_name\": \"كراسي\"}\n]\n\n ```\n\n---\n\n### GET — Get Single Category\n\n**Request:**\n\n```\nGET {{base_url}}/items/categories/{id}/\n\n ```\n\n**Response** **`200 OK`****:**\n\n``` json\n{\"id\": 3, \"name\": \"كراسي خشب\", \"parent\": 2, \"parent_name\": \"كراسي\"}\n\n ```\n\n**Response** **`404 Not Found`** — if category does not exist.\n\n---\n\n### POST — Create Category\n\n**Request:**\n\n```\nPOST {{base_url}}/items/categories/\nContent-Type: application/json\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"name\": \"كراسي معدن\",\n  \"parent\": 2\n}\n\n ```\n\n**Response** **`201 Created`****:**\n\n``` json\n{\"id\": 11, \"name\": \"كراسي معدن\", \"parent\": 2, \"parent_name\": \"كراسي\"}\n\n ```\n\n**Response** **`400 Bad Request`** — if validation fails.\n\n---\n\n### PUT — Update Category\n\n**Request:**\n\n```\nPUT {{base_url}}/items/categories/{id}/\nContent-Type: application/json\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"name\": \"Updated Name\",\n  \"parent\": null\n}\n\n ```\n\n**Response** **`200 OK`** — returns updated category object.\n\n**Response** **`400 Bad Request`** — if validation fails.\n\n**Response** **`404 Not Found`** — if category does not exist.\n\n---\n\n### DELETE — Delete Category\n\n**Request:**\n\n```\nDELETE {{base_url}}/items/categories/{id}/\n\n ```\n\n**Response** **`204 No Content`** — category deleted successfully.\n\n**Response** **`404 Not Found`** — if category does not exist.\n\n---\n\n### Notes\n\n- Categories support a **hierarchical tree structure** — a category can have a parent category.\n    \n- Top-level categories have `parent: null`.\n    \n- The `parent_name` field is read-only and auto-populated from the parent category."
+      },
+      "response": []
+    },
+    {
+      "name": "CheckListView",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/items/checklists/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "items",
+            "checklists",
+            ""
+          ]
+        },
+        "description": "## CheckList API\n\nThis endpoint manages **checklists** — a simple list of named checklist items.\n\n**Base URL:** `{{base_url}}/items/checklists/`\n\n---\n\n### Endpoints\n\n| Method | URL | Description |\n| --- | --- | --- |\n| GET | `/checklists/` | Get all checklists |\n| GET | `/checklists/{id}/` | Get a single checklist by ID |\n| POST | `/checklists/` | Create a new checklist |\n| PUT | `/checklists/{id}/` | Update an existing checklist |\n| DELETE | `/checklists/{id}/` | Delete a checklist |\n\n---\n\n### Response Schema\n\n``` json\n{\n  \"id\": 1,\n  \"name\": \"string\"\n}\n\n ```\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `id` | integer | Unique identifier for the checklist item |\n| `name` | string | Name/label of the checklist item (supports Arabic) |\n\n---\n\n### GET — List All Checklists\n\n**Request:**\n\n```\nGET {{base_url}}/items/checklists/\n\n ```\n\n**Response** **`200 OK`****:**\n\n``` json\n[\n  {\"id\": 1, \"name\": \"تم تصدير الخامة\"},\n  {\"id\": 2, \"name\": \"تم تصدير الالوان\"},\n  {\"id\": 3, \"name\": \"كله زي الفل\"}\n]\n\n ```\n\n---\n\n### GET — Get Single Checklist\n\n**Request:**\n\n```\nGET {{base_url}}/items/checklists/{id}/\n\n ```\n\n**Response** **`200 OK`****:**\n\n``` json\n{\"id\": 1, \"name\": \"تم تصدير الخامة\"}\n\n ```\n\n**Response** **`404 Not Found`** — if checklist does not exist.\n\n---\n\n### POST — Create Checklist\n\n**Request:**\n\n```\nPOST {{base_url}}/items/checklists/\nContent-Type: application/json\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"name\": \"تم مراجعة الطلب\"\n}\n\n ```\n\n**Response** **`201 Created`****:**\n\n``` json\n{\"id\": 6, \"name\": \"تم مراجعة الطلب\"}\n\n ```\n\n**Response** **`400 Bad Request`** — if validation fails.\n\n---\n\n### PUT — Update Checklist\n\n**Request:**\n\n```\nPUT {{base_url}}/items/checklists/{id}/\nContent-Type: application/json\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"name\": \"Updated Name\"\n}\n\n ```\n\n**Response** **`200 OK`** — returns updated checklist object.\n\n**Response** **`400 Bad Request`** — if validation fails.\n\n**Response** **`404 Not Found`** — if checklist does not exist.\n\n---\n\n### DELETE — Delete Checklist\n\n**Request:**\n\n```\nDELETE {{base_url}}/items/checklists/{id}/\n\n ```\n\n**Response** **`204 No Content`** — checklist deleted successfully.\n\n**Response** **`404 Not Found`** — if checklist does not exist.\n\n---\n\n### Notes\n\n- Each checklist item has only a `name` field — it is a simple flat list with no hierarchy.\n    \n- The `name` field supports Arabic text."
+      },
+      "response": []
+    },
+    {
+      "name": "ItemListView",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/items/items/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "items",
+            "items",
+            ""
+          ]
+        },
+        "description": "## Item API\n\nThis endpoint manages **items** — products that belong to a category and have associated checklists tracking their status.\n\n**Base URL:** `{{base_url}}/items/items/`\n\n---\n\n### Endpoints\n\n| Method | URL | Description |\n| --- | --- | --- |\n| GET | `/items/` | Get all items |\n| GET | `/items/{id}` | Get a single item by ID |\n| POST | `/items/` | Create a new item |\n| PUT | `/items/{id}` | Update an existing item |\n| DELETE | `/items/{id}` | Delete an item |\n\n---\n\n### Response Schema\n\n``` json\n{\n  \"id\": 1,\n  \"category\": 1,\n  \"category_name\": \"مفروشات\",\n  \"item_code\": \"BLACKOUT_CURTAINS_1\",\n  \"description\": \"ستائر لزوم المكاتب الادارية مقاسات مختلفة\",\n  \"checklists\": [\n    {\n      \"id\": 4,\n      \"checklist_name\": \"مصر في كاس العالم\",\n      \"is_completed\": true,\n      \"updated_at\": \"2026-07-07T12:21:43.778001+03:00\"\n    }\n  ]\n}\n\n ```\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `id` | integer | Unique identifier for the item |\n| `category` | integer | ID of the category this item belongs to |\n| `category_name` | string | Name of the category (read-only) |\n| `item_code` | string | Unique code/SKU for the item |\n| `description` | string | Description of the item (supports Arabic) |\n| `checklists` | array | List of checklist entries associated with this item |\n| `checklists[].id` | integer | Unique ID of the checklist entry |\n| `checklists[].checklist_name` | string | Name of the checklist |\n| `checklists[].is_completed` | boolean | Whether this checklist step is completed |\n| `checklists[].updated_at` | datetime | Last update timestamp (ISO 8601) |\n\n---\n\n### GET — List All Items\n\n**Request:**\n\n```\nGET {{base_url}}/items/items/\n\n ```\n\n**Response** **`200 OK`****:**\n\n``` json\n[\n  {\n    \"id\": 1,\n    \"category\": 1,\n    \"category_name\": \"مفروشات\",\n    \"item_code\": \"BLACKOUT_CURTAINS_1\",\n    \"description\": \"ستائر لزوم المكاتب الادارية مقاسات مختلفة\",\n    \"checklists\": [\n      {\"id\": 4, \"checklist_name\": \"مصر في كاس العالم\", \"is_completed\": true, \"updated_at\": \"2026-07-07T12:21:43.778001+03:00\"},\n      {\"id\": 7, \"checklist_name\": \"مطولين شويه\", \"is_completed\": false, \"updated_at\": \"2026-07-06T14:46:28.410981+03:00\"}\n    ]\n  }\n]\n\n ```\n\n---\n\n### GET — Get Single Item\n\n**Request:**\n\n```\nGET {{base_url}}/items/items/{id}\n\n ```\n\n**Response** **`200 OK`** — returns a single item object.\n\n**Response** **`404 Not Found`** — if item does not exist.\n\n---\n\n### POST — Create Item\n\n**Request:**\n\n```\nPOST {{base_url}}/items/items/\nContent-Type: application/json\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"category\": 1,\n  \"item_code\": \"NEW_ITEM_01\",\n  \"description\": \"وصف المنتج الجديد\"\n}\n\n ```\n\n**Response** **`201 Created`** — returns the created item object.\n\n**Response** **`400 Bad Request`** — if validation fails.\n\n---\n\n### PUT — Update Item\n\n**Request:**\n\n```\nPUT {{base_url}}/items/items/{id}\nContent-Type: application/json\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"category\": 2,\n  \"item_code\": \"UPDATED_ITEM_01\",\n  \"description\": \"وصف محدث للمنتج\"\n}\n\n ```\n\n**Response** **`200 OK`** — returns the updated item object.\n\n**Response** **`400 Bad Request`** — if validation fails.\n\n**Response** **`404 Not Found`** — if item does not exist.\n\n---\n\n### DELETE — Delete Item\n\n**Request:**\n\n```\nDELETE {{base_url}}/items/items/{id}\n\n ```\n\n**Response** **`204 No Content`** — item deleted successfully.\n\n**Response** **`404 Not Found`** — if item does not exist.\n\n---\n\n### Notes\n\n- Each item belongs to a **category** (referenced by `category` ID).\n    \n- `category_name` is a read-only field auto-populated from the related category.\n    \n- Each item has a list of **checklists** that track completion status for different steps/tasks.\n    \n- `item_code` is a unique identifier/SKU for the product.\n    \n- All text fields support Arabic."
+      },
+      "response": []
+    },
+    {
+      "name": "get_club_categories",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/items/clubs/1/categories/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "items",
+            "clubs",
+            "1",
+            "categories",
+            ""
+          ]
+        },
+        "description": "## Get Club Categories\n\nThis endpoint returns all **categories** that have items linked to a specific club — with no duplicates.\n\n**Base URL:** `{{base_url}}/items/clubs/{club_id}/categories/`\n\n---\n\n### Endpoint\n\n| Method | URL | Description |\n| --- | --- | --- |\n| GET | `/clubs/{club_id}/categories/` | Get all categories linked to a specific club |\n\n---\n\n### URL Parameters\n\n| Parameter | Type | Required | Description |\n| --- | --- | --- | --- |\n| `club_id` | integer | Yes | The ID of the club to fetch categories for |\n\n---\n\n### Response Schema\n\n``` json\n{\n  \"id\": 1,\n  \"name\": \"string\",\n  \"parent\": null,\n  \"parent_name\": null\n}\n\n ```\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `id` | integer | Unique identifier for the category |\n| `name` | string | Category name (supports Arabic) |\n| `parent` | integer | null |\n| `parent_name` | string | null |\n\n---\n\n### GET — Get Categories for a Club\n\n**Request:**\n\n```\nGET {{base_url}}/items/clubs/1/categories/\n\n ```\n\n**Response** **`200 OK`****:**\n\n``` json\n[\n  {\"id\": 1, \"name\": \"مفروشات\", \"parent\": null, \"parent_name\": null},\n  {\"id\": 3, \"name\": \"كراسي خشب\", \"parent\": 2, \"parent_name\": \"كراسي\"},\n  {\"id\": 15, \"name\": \"مكاتب\", \"parent\": null, \"parent_name\": null}\n]\n\n ```\n\n---\n\n### How It Works\n\nThis endpoint queries categories through the following relationship chain:\n\n```\nClub → ClubItem → Item → Category\n\n ```\n\nIt filters all categories that have at least one item linked to the given club via the `ClubItem` join table, and returns them **without duplicates** (using `distinct()`).\n\n---\n\n### Notes\n\n- Only categories that have **at least one item** associated with the specified club are returned.\n    \n- Results may include both **top-level categories** (`parent: null`) and **sub-categories** (`parent` has a value).\n    \n- This is a **read-only** endpoint — only `GET` is supported.\n    \n- No request body is required."
+      },
+      "response": []
+    },
+    {
+      "name": "get_club_items_by_category",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/items/clubs/2/categories/1/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "items",
+            "clubs",
+            "2",
+            "categories",
+            "1",
+            ""
+          ]
+        },
+        "description": "## Get Club Items by Category\n\nThis endpoint returns all **items belonging to a specific category** that are linked to a specific club, along with their checklist statuses.\n\n**Base URL:** `{{base_url}}/items/clubs/{club_id}/categories/{category_id}/`\n\n---\n\n### Endpoint\n\n| Method | URL | Description |\n| --- | --- | --- |\n| GET | `/clubs/{club_id}/categories/{category_id}/` | Get all items in a category for a specific club |\n\n---\n\n### URL Parameters\n\n| Parameter | Type | Required | Description |\n| --- | --- | --- | --- |\n| `club_id` | integer | Yes | The ID of the club |\n| `category_id` | integer | Yes | The ID of the category to filter items by |\n\n---\n\n### Response Schema\n\n``` json\n{\n  \"id\": 5,\n  \"club\": 2,\n  \"item\": 1,\n  \"item_code\": \"BLACKOUT_CURTAINS_1\",\n  \"item_description\": \"ستائر لزوم المكاتب الادارية مقاسات مختلفة\",\n  \"quantity\": 140,\n  \"checklists\": [\n    {\n      \"id\": 1,\n      \"checklist\": 1,\n      \"checklist_name\": \"تم تصدير الخامة\",\n      \"is_completed\": false,\n      \"updated_at\": \"2026-07-07T12:17:26.386263+03:00\"\n    }\n  ]\n}\n\n ```\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `id` | integer | Unique ID of the ClubItem record |\n| `club` | integer | ID of the club |\n| `item` | integer | ID of the item |\n| `item_code` | string | Unique code/SKU of the item (read-only) |\n| `item_description` | string | Description of the item (read-only, supports Arabic) |\n| `quantity` | integer | Quantity of this item assigned to the club |\n| `checklists` | array | List of checklist entries for this ClubItem |\n| `checklists[].id` | integer | Unique ID of the ClubItem checklist entry |\n| `checklists[].checklist` | integer | ID of the checklist |\n| `checklists[].checklist_name` | string | Name of the checklist step |\n| `checklists[].is_completed` | boolean | Whether this checklist step is completed |\n| `checklists[].updated_at` | datetime | Last update timestamp (ISO 8601) |\n\n---\n\n### GET — Get Items by Category for a Club\n\n**Request:**\n\n```\nGET {{base_url}}/items/clubs/2/categories/1/\n\n ```\n\n**Response** **`200 OK`****:**\n\n``` json\n[\n  {\n    \"id\": 5,\n    \"club\": 2,\n    \"item\": 1,\n    \"item_code\": \"BLACKOUT_CURTAINS_1\",\n    \"item_description\": \"ستائر لزوم المكاتب الادارية مقاسات مختلفة\",\n    \"quantity\": 140,\n    \"checklists\": [\n      {\"id\": 1, \"checklist\": 1, \"checklist_name\": \"تم تصدير الخامة\", \"is_completed\": false, \"updated_at\": \"2026-07-07T12:17:26.386263+03:00\"},\n      {\"id\": 2, \"checklist\": 2, \"checklist_name\": \"تم تصدير الالوان\", \"is_completed\": false, \"updated_at\": \"2026-07-07T11:22:11.280256+03:00\"},\n      {\"id\": 4, \"checklist\": 4, \"checklist_name\": \"مصر في كاس العالم\", \"is_completed\": true, \"updated_at\": \"2026-07-07T12:17:40.722937+03:00\"}\n    ]\n  }\n]\n\n ```\n\n---\n\n### How It Works\n\nThis endpoint queries through the following relationship chain:\n\n```\nClub → ClubItem → Item → Category\n\n ```\n\n1. Filters `ClubItem` records by `club_id`.\n    \n2. Further filters by `item__category_id` to get only items in the specified category.\n    \n3. For each `ClubItem`, the serializer fetches `item_code` and `item_description` from the related `Item`, and all associated checklists from the `ClubItemCheckList` join table.\n    \n\n---\n\n### Notes\n\n- Returns an **empty array** **`[]`** if no items exist for the given club and category combination.\n    \n- `item_code` and `item_description` are **read-only** fields derived from the related `Item`.\n    \n- Each checklist entry tracks the completion status **per ClubItem** (not globally per item).\n    \n- This is a **read-only** endpoint — only `GET` is supported.\n    \n- No request body is required."
+      },
+      "response": []
+    },
+    {
+      "name": "add_or_update_item_in_club",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"item\": 3,\r\n    \"quantity\": 35\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/items/clubs/1/add-item/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "items",
+            "clubs",
+            "1",
+            "add-item",
+            ""
+          ]
+        },
+        "description": "## Add or Update Item in Club\n\nThis endpoint **adds a new item to a club** or **updates its quantity** if it already exists — using a single `POST` request (upsert behavior).\n\n**Base URL:** `{{base_url}}/items/clubs/{club_id}/add-item/`\n\n---\n\n### Endpoint\n\n| Method | URL | Description |\n| --- | --- | --- |\n| POST | `/clubs/{club_id}/add-item/` | Add a new item to a club, or update its quantity if already exists |\n\n---\n\n### URL Parameters\n\n| Parameter | Type | Required | Description |\n| --- | --- | --- | --- |\n| `club_id` | integer | Yes | The ID of the club to add/update the item in |\n\n---\n\n### Request Body\n\n``` json\n{\n  \"item\": 3,\n  \"quantity\": 35\n}\n\n ```\n\n| Field | Type | Required | Description |\n| --- | --- | --- | --- |\n| `item` | integer | Yes | The ID of the item to add or update |\n| `quantity` | integer | Yes | The quantity of the item for this club |\n\n---\n\n### Response Schema\n\n``` json\n{\n  \"message\": \"string\",\n  \"data\": {\n    \"id\": 4,\n    \"club_id\": 1,\n    \"club_name\": \"عبدالله بيك الكبير\",\n    \"item_code\": \"DIRECTOR_DESK_37\",\n    \"quantity\": 35\n  }\n}\n\n ```\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `message` | string | Arabic message indicating whether the item was created or updated |\n| `data.id` | integer | Unique ID of the ClubItem record |\n| `data.club_id` | integer | ID of the club |\n| `data.club_name` | string | Name of the club |\n| `data.item_code` | string | Unique code/SKU of the item |\n| `data.quantity` | integer | The quantity set for this item in the club |\n\n---\n\n### POST — Add or Update Item\n\n**Request:**\n\n```\nPOST {{base_url}}/items/clubs/1/add-item/\nContent-Type: application/json\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"item\": 3,\n  \"quantity\": 35\n}\n\n ```\n\n**Response** **`200 OK`** **— Item already existed (quantity updated):**\n\n``` json\n{\n  \"message\": \"المنتج كان موجوداً بالفعل في هذا النادي، وتم تحديث كميته.\",\n  \"data\": {\n    \"id\": 4,\n    \"club_id\": 1,\n    \"club_name\": \"عبدالله بيك الكبير\",\n    \"item_code\": \"DIRECTOR_DESK_37\",\n    \"quantity\": 35\n  }\n}\n\n ```\n\n**Response** **`200 OK`** **— Item newly added:**\n\n``` json\n{\n  \"message\": \"تم إضافة المنتج للنادي بنجاح بالكمية المحددة.\",\n  \"data\": {\n    \"id\": 7,\n    \"club_id\": 1,\n    \"club_name\": \"عبدالله بيك الكبير\",\n    \"item_code\": \"BLACKOUT_CURTAINS_1\",\n    \"quantity\": 50\n  }\n}\n\n ```\n\n**Response** **`400 Bad Request`** — if validation fails (e.g. missing fields or invalid item ID).\n\n**Response** **`404 Not Found`** — if the `club_id` does not exist.\n\n---\n\n### How It Works\n\nThis endpoint uses Django's `update_or_create` to implement **upsert** logic:\n\n1. Validates that the club exists via `club_id` in the URL — returns `404` if not found.\n    \n2. Validates the request body using `AddClubItemSerializer`.\n    \n3. Looks for an existing `ClubItem` record matching the `club` and `item`.\n    - **If found:** updates the `quantity` with the new value.\n        \n    - **If not found:** creates a new `ClubItem` record with the given `quantity`.\n        \n4. Returns `200 OK` in both cases, with a descriptive Arabic message indicating what happened.\n    \n\n---\n\n### Notes\n\n- Both **create** and **update** return `200 OK` (not `201 Created`) — check the `message` field to know which action was performed.\n    \n- The `club_id` is taken from the **URL**, not the request body.\n    \n- If the same item is sent again with a different quantity, the quantity will be **overwritten** (not incremented).\n    \n- This is a **write** endpoint — only `POST` is supported."
+      },
+      "response": []
+    },
+    {
+      "name": "update_club_checklist_status",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"is_completed\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/items/checklists/1/update/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "items",
+            "checklists",
+            "1",
+            "update",
+            ""
+          ]
+        },
+        "description": "## Update Club Checklist Status\n\nThis endpoint **updates the completion status** (`is_completed`) of a specific checklist entry linked to a club item — using a `PATCH` request to modify only that single field.\n\n**Base URL:** `{{base_url}}/items/checklists/{pk}/update/`\n\n---\n\n### Endpoint\n\n| Method | URL | Description |\n| --- | --- | --- |\n| PATCH | `/checklists/{pk}/update/` | Update the `is_completed` status of a checklist entry |\n\n---\n\n### URL Parameters\n\n| Parameter | Type | Required | Description |\n| --- | --- | --- | --- |\n| `pk` | integer | Yes | The ID of the `ClubItemCheckList` entry to update |\n\n---\n\n### Request Body\n\n``` json\n{\n  \"is_completed\": true\n}\n\n ```\n\n| Field | Type | Required | Description |\n| --- | --- | --- | --- |\n| `is_completed` | boolean | Yes | The new completion status — `true` (done) or `false` (not done) |\n\n---\n\n### Response Schema\n\n``` json\n{\n  \"message\": \"تم تحديث الحالة بنجاح.\",\n  \"data\": {\n    \"is_completed\": true\n  }\n}\n\n ```\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `message` | string | Arabic confirmation message |\n| `data.is_completed` | boolean | The updated completion status |\n\n---\n\n### PATCH — Update Checklist Status\n\n**Request:**\n\n```\nPATCH {{base_url}}/items/checklists/1/update/\nContent-Type: application/json\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"is_completed\": true\n}\n\n ```\n\n**Response** **`200 OK`****:**\n\n``` json\n{\n  \"message\": \"تم تحديث الحالة بنجاح.\",\n  \"data\": {\n    \"is_completed\": true\n  }\n}\n\n ```\n\n**To mark as incomplete:**\n\n``` json\n{\n  \"is_completed\": false\n}\n\n ```\n\n**Response** **`400 Bad Request`** — if the request body is invalid or `is_completed` is missing.\n\n**Response** **`404 Not Found`** — if the checklist entry with the given `pk` does not exist.\n\n---\n\n### How It Works\n\n1. Looks up the `ClubItemCheckList` record by `pk` — returns `404` if not found.\n    \n2. Passes the request data to `UpdateClubItemCheckListSerializer` with `partial=True`, allowing only `is_completed` to be updated.\n    \n3. Saves the change to the database and returns `200 OK` with a confirmation message.\n    \n\n---\n\n### Notes\n\n- This endpoint uses `PATCH` (not `PUT`) because only **one field** (`is_completed`) is being modified.\n    \n- The `pk` in the URL refers to the **`ClubItemCheckList`** **entry ID**, not the checklist template ID or the item ID.\n    \n- Only `is_completed` can be modified through this endpoint — all other fields are read-only.\n    \n- To find the correct `pk`, use the [get_club_items_by_category](https://get_club_items_by_category) endpoint and look at `checklists[].id` in the response.\n    \n\n---"
+      },
+      "response": []
+    },
+    {
+      "name": "update_item_checklist_status",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"is_completed\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/items/checklists/1/update/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "items",
+            "checklists",
+            "1",
+            "update",
+            ""
+          ]
+        },
+        "description": "## Update Item Checklist Status\n\nThis endpoint **updates the completion status** (`is_completed`) of a specific checklist entry linked to an item — using a `PATCH` request to modify only that single field.\n\n**Base URL:** `{{base_url}}/items/items/checklists/{pk}/update/`\n\n---\n\n### Endpoint\n\n| Method | URL | Description |\n| --- | --- | --- |\n| PATCH | `/items/checklists/{pk}/update/` | Update the `is_completed` status of an item checklist entry |\n\n---\n\n### URL Parameters\n\n| Parameter | Type | Required | Description |\n| --- | --- | --- | --- |\n| `pk` | integer | Yes | The ID of the `ItemCheckList` entry to update |\n\n---\n\n### Request Body\n\n``` json\n{\n  \"is_completed\": true\n}\n\n ```\n\n| Field | Type | Required | Description |\n| --- | --- | --- | --- |\n| `is_completed` | boolean | Yes | The new completion status — `true` (done) or `false` (not done) |\n\n---\n\n### Response Schema\n\n``` json\n{\n  \"message\": \"تم تحديث الحالة بنجاح.\",\n  \"data\": {\n    \"is_completed\": true\n  }\n}\n\n ```\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `message` | string | Arabic confirmation message |\n| `data.is_completed` | boolean | The updated completion status |\n\n---\n\n### PATCH — Update Item Checklist Status\n\n**Request:**\n\n```\nPATCH {{base_url}}/items/items/checklists/1/update/\nContent-Type: application/json\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"is_completed\": true\n}\n\n ```\n\n**Response** **`200 OK`****:**\n\n``` json\n{\n  \"message\": \"تم تحديث الحالة بنجاح.\",\n  \"data\": {\n    \"is_completed\": true\n  }\n}\n\n ```\n\n**To mark as incomplete:**\n\n``` json\n{\n  \"is_completed\": false\n}\n\n ```\n\n**Response** **`400 Bad Request`** — if the request body is invalid or `is_completed` is missing.\n\n**Response** **`404 Not Found`** — if the checklist entry with the given `pk` does not exist.\n\n---\n\n### How It Works\n\n1. Looks up the `ItemCheckList` record by `pk` — returns `404` if not found.\n    \n2. Passes the request data to `UpdateItemCheckListSerializer` with `partial=True`, allowing only `is_completed` to be updated.\n    \n3. Saves the change to the database and returns `200 OK` with a confirmation message.\n    \n\n---\n\n### Difference from `update_club_checklist_status`\n\n|  | `update_item_checklist_status` | `update_club_checklist_status` |\n| --- | --- | --- |\n| **Model** | `ItemCheckList` | `ClubItemCheckList` |\n| **Scope** | Global item-level checklist | Per-club item checklist |\n| **URL** | `/items/checklists/{pk}/update/` | `/checklists/{pk}/update/` |\n\n---\n\n### Notes\n\n- This endpoint uses `PATCH` (not `PUT`) because only **one field** (`is_completed`) is being modified.\n    \n- The `pk` in the URL refers to the **`ItemCheckList`** **entry ID**, not the checklist template ID or the item ID.\n    \n- Only `is_completed` can be modified through this endpoint — all other fields are read-only.\n    \n- To find the correct `pk`, use the [ItemListView](https://ItemListView) endpoint and look at `checklists[].id` in the response."
+      },
+      "response": []
+    }
+  ]
+}
