@@ -7,6 +7,7 @@ import { ChevronLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
+import { useDashboardInsights } from "@/hooks/useDashboardInsights";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
 import { selectSidebarOpen } from "@/store/selectors/dashboardSelectors";
@@ -28,6 +29,7 @@ function SidebarContent({
   showMobileHeader = false,
 }: SidebarContentProps) {
   const pathname = usePathname();
+  const { badgesByRoute } = useDashboardInsights();
 
   return (
     <div className="flex h-full flex-col">
@@ -66,6 +68,7 @@ function SidebarContent({
         {siteConfig.navigation.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
+          const badgeCount = badgesByRoute[item.href] ?? 0;
 
           return (
             <Link
@@ -90,15 +93,26 @@ function SidebarContent({
               {isExpanded ? (
                 <>
                   <span className="flex-1">{item.title}</span>
-                  <ChevronLeft
-                    className={cn(
-                      "size-4 transition-transform",
-                      isActive
-                        ? "translate-x-0 text-primary"
-                        : "-translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
-                    )}
-                  />
+                  <div className="flex items-center gap-2">
+                    {badgeCount > 0 ? (
+                      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+                        {badgeCount}
+                      </span>
+                    ) : null}
+                    <ChevronLeft
+                      className={cn(
+                        "size-4 transition-transform",
+                        isActive
+                          ? "translate-x-0 text-primary"
+                          : "-translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
+                      )}
+                    />
+                  </div>
                 </>
+              ) : badgeCount > 0 ? (
+                <span className="absolute top-2 left-2 flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                  {badgeCount}
+                </span>
               ) : null}
             </Link>
           );
@@ -109,11 +123,7 @@ function SidebarContent({
         <div className="rounded-[1.75rem] border border-white/70 bg-white/75 p-4 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.4)]">
           {isExpanded ? (
             <>
-              <p className="text-sm font-semibold">نظام مرتب وقابل للتوسع</p>
-              <p className="mt-1 text-xs leading-6 text-muted-foreground">
-                نثبت الآن الـ foundation والـ CRUD pattern حتى تكون كل feature القادمة
-                أسرع وأكثر ثباتًا.
-              </p>
+              <p className="text-sm font-semibold">نظام ادارة الاندية</p>
             </>
           ) : (
             <div className="flex justify-center">

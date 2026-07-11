@@ -25,6 +25,8 @@ export function ClubCategorySelector({
   onValueChange,
   value,
 }: ClubCategorySelectorProps) {
+  const selectedCategory = categories.find((category) => String(category.id) === value);
+
   return (
     <div className="rounded-[1.75rem] bg-white/80 p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
@@ -40,7 +42,9 @@ export function ClubCategorySelector({
           disabled={disabled}
           id="club-category-selector"
         >
-          <SelectValue placeholder="اختر الفئة التابعة للنادي" />
+          <SelectValue placeholder="اختر الفئة التابعة للنادي">
+            {selectedCategory ? selectedCategory.name : null}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {categories.map((category) => (

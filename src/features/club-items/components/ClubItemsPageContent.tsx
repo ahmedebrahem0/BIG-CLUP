@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import {
   ArrowLeftRight,
   CheckSquare2,
+  Filter,
   LayoutGrid,
   PackagePlus,
   Search,
@@ -11,9 +12,18 @@ import {
 import { EmptyState } from "@/components/common/EmptyState";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { Loader } from "@/components/common/Loader";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { AddOrUpdateClubItemForm } from "./AddOrUpdateClubItemForm";
 import { ClubCategorySelector } from "./ClubCategorySelector";
@@ -23,12 +33,17 @@ import { useClubItemsWorkspace } from "../hooks/useClubItemsWorkspace";
 
 export function ClubItemsPageContent() {
   const {
+    checklistMatchFilter,
+    checklistNameOptions,
+    clearChecklistNameSelection,
+    clubItemInsights,
     clubCategories,
     clubCategoriesQuery,
     clubItems,
     clubItemsQuery,
     clubs,
     clubsQuery,
+    completedCountFilter,
     filteredClubItemsCount,
     formDefaultValues,
     formMode,
@@ -44,13 +59,20 @@ export function ClubItemsPageContent() {
     openCreateForm,
     openEditQuantityForm,
     pendingChecklistId,
+    resetFilters,
     searchValue,
     selectedCategory,
     selectedCategoryId,
+    selectedChecklistNames,
     selectedClub,
     selectedClubId,
+    setChecklistMatchFilter,
+    setCompletedCountFilter,
     setSearchValue,
+    setStatusFilter,
+    statusFilter,
     submitClubItem,
+    toggleChecklistNameSelection,
     toggleChecklistStatus,
   } = useClubItemsWorkspace();
 
@@ -145,21 +167,202 @@ export function ClubItemsPageContent() {
 
         {numericClubId && numericCategoryId ? (
           <Card className="rounded-[2rem] border-white/80 bg-white/84 shadow-[0_30px_70px_-52px_rgba(15,23,42,0.36)]">
-            <CardHeader className="gap-4 lg:flex lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <CardTitle>بحث داخل مساحة العمل</CardTitle>
-                <CardDescription>
-                  ابحث في أصناف النادي الحالية باستخدام الكود أو الوصف.
-                </CardDescription>
+            <CardHeader className="gap-5">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div>
+                  <CardTitle>بحث وفلترة داخل مساحة العمل</CardTitle>
+                  <CardDescription>
+                    فلترة سريعة جدًا على البيانات المحملة: حسب الحالة، وعدد العناصر المكتملة،
+                    أو أكثر من checklist بالاسم نفسه والحالة التي تحددها.
+                  </CardDescription>
+                </div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="relative w-full sm:w-80">
+                    <Search className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      className="h-11 rounded-2xl bg-background/70 pr-10"
+                      onChange={(event) => setSearchValue(event.target.value)}
+                      placeholder="ابحث بالكود أو الوصف"
+                      value={searchValue}
+                    />
+                  </div>
+                  <Button onClick={resetFilters} size="sm" variant="outline">
+                    <Filter className="size-4" />
+                    إعادة ضبط الفلاتر
+                  </Button>
+                </div>
               </div>
-              <div className="relative w-full sm:w-80">
-                <Search className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  className="h-11 rounded-2xl bg-background/70 pr-10"
-                  onChange={(event) => setSearchValue(event.target.value)}
-                  placeholder="ابحث بالكود أو الوصف"
-                  value={searchValue}
-                />
+
+              <div className="grid gap-3 xl:grid-cols-3">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground/80">حالة التنفيذ</p>
+                  <Select onValueChange={(value) => setStatusFilter(value as typeof statusFilter)} value={statusFilter}>
+                    <SelectTrigger className="h-11 w-full rounded-2xl bg-background/70 px-4">
+                      <SelectValue placeholder="حالة التنفيذ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">كل الأصناف</SelectItem>
+                      <SelectItem value="all-completed">كل الـ checklist مكتملة</SelectItem>
+                      <SelectItem value="has-pending">فيها عناصر غير مكتملة</SelectItem>
+                      <SelectItem value="none-completed">ولا عنصر مكتمل</SelectItem>
+                      <SelectItem value="mixed">بعضها مكتمل وبعضها لا</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground/80">عدد الخطوات المكتملة</p>
+                  <Select
+                    onValueChange={(value) => setCompletedCountFilter(value as typeof completedCountFilter)}
+                    value={completedCountFilter}
+                  >
+                    <SelectTrigger className="h-11 w-full rounded-2xl bg-background/70 px-4">
+                      <SelectValue placeholder="عدد المكتمل" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">كل الأعداد</SelectItem>
+                      <SelectItem value="0">بدون أي عنصر مكتمل</SelectItem>
+                      <SelectItem value="1">عنصر واحد مكتمل</SelectItem>
+                      <SelectItem value="2plus">عنصران أو أكثر مكتملان</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground/80">حالة الأسماء المحددة</p>
+                  <Select
+                    onValueChange={(value) => setChecklistMatchFilter(value as typeof checklistMatchFilter)}
+                    value={checklistMatchFilter}
+                  >
+                    <SelectTrigger className="h-11 w-full rounded-2xl bg-background/70 px-4">
+                      <SelectValue placeholder="حالة الأسماء المحددة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">أي حالة</SelectItem>
+                      <SelectItem value="checked">المعلم عليها صح فقط</SelectItem>
+                      <SelectItem value="unchecked">غير المعلم عليها فقط</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="rounded-[1.5rem] border border-border/60 bg-background/70 p-4">
+                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground/80">اختيار أسماء التشيك ليست</p>
+                    <p className="text-xs text-muted-foreground">
+                      اختر اسمًا واحدًا أو أكثر. سيتم عرض الأصناف التي تحقق كل الأسماء المحددة.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="rounded-full" variant="secondary">
+                      {selectedChecklistNames.length} محدد
+                    </Badge>
+                    <Button
+                      className="rounded-full"
+                      disabled={selectedChecklistNames.length === 0}
+                      onClick={clearChecklistNameSelection}
+                      size="sm"
+                      variant="outline"
+                    >
+                      مسح الاختيار
+                    </Button>
+                  </div>
+                </div>
+
+                {checklistNameOptions.length ? (
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    {checklistNameOptions.map((checklistName) => {
+                      const isSelected = selectedChecklistNames.includes(checklistName);
+
+                      return (
+                        <button
+                          key={checklistName}
+                          className={[
+                            "flex items-center gap-3 rounded-2xl border px-4 py-3 text-right transition-colors",
+                            isSelected
+                              ? "border-primary/40 bg-primary/10 text-foreground"
+                              : "border-border/60 bg-white/80 hover:border-primary/30 hover:bg-primary/5",
+                          ].join(" ")}
+                          onClick={() => toggleChecklistNameSelection(checklistName)}
+                          type="button"
+                        >
+                          <Checkbox checked={isSelected} />
+                          <span className="text-sm font-medium leading-6">{checklistName}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    لا توجد أسماء checklist متاحة داخل النتائج الحالية.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="rounded-full bg-primary/10 px-4 py-1.5 text-primary hover:bg-primary/10" variant="secondary">
+                  {filteredClubItemsCount} نتيجة من أصل {clubItemInsights.total}
+                </Badge>
+                <Button
+                  className="rounded-full"
+                  onClick={() => {
+                    setStatusFilter("all");
+                    setCompletedCountFilter("all");
+                  }}
+                  size="sm"
+                  variant={statusFilter === "all" && completedCountFilter === "all" ? "default" : "outline"}
+                >
+                  الكل ({clubItemInsights.total})
+                </Button>
+                <Button
+                  className="rounded-full"
+                  onClick={() => setStatusFilter("all-completed")}
+                  size="sm"
+                  variant={statusFilter === "all-completed" ? "default" : "outline"}
+                >
+                  مكتمل بالكامل ({clubItemInsights.allCompleted})
+                </Button>
+                <Button
+                  className="rounded-full"
+                  onClick={() => setStatusFilter("has-pending")}
+                  size="sm"
+                  variant={statusFilter === "has-pending" ? "default" : "outline"}
+                >
+                  فيه نواقص ({clubItemInsights.hasPending})
+                </Button>
+                <Button
+                  className="rounded-full"
+                  onClick={() => setStatusFilter("none-completed")}
+                  size="sm"
+                  variant={statusFilter === "none-completed" ? "default" : "outline"}
+                >
+                  ولا خطوة ({clubItemInsights.noneCompleted})
+                </Button>
+                <Button
+                  className="rounded-full"
+                  onClick={() => setStatusFilter("mixed")}
+                  size="sm"
+                  variant={statusFilter === "mixed" ? "default" : "outline"}
+                >
+                  حالة مختلطة ({clubItemInsights.mixed})
+                </Button>
+                <Button
+                  className="rounded-full"
+                  onClick={() => setCompletedCountFilter("1")}
+                  size="sm"
+                  variant={completedCountFilter === "1" ? "default" : "outline"}
+                >
+                  نوع واحد متعلم ({clubItemInsights.exactlyOneCompleted})
+                </Button>
+                <Button
+                  className="rounded-full"
+                  onClick={() => setCompletedCountFilter("2plus")}
+                  size="sm"
+                  variant={completedCountFilter === "2plus" ? "default" : "outline"}
+                >
+                  نوعان أو أكثر ({clubItemInsights.twoOrMoreCompleted})
+                </Button>
               </div>
             </CardHeader>
           </Card>

@@ -16,7 +16,7 @@ export const siteConfig = {
     { title: "الأندية", href: ROUTES.clubs, icon: Building2 },
     { title: "الفئات", href: ROUTES.categories, icon: FolderTree },
     { title: "التشيك ليست", href: ROUTES.checklists, icon: ClipboardList },
-    { title: "الأصناف", href: ROUTES.items, icon: Package2 },
+    { title: "المنتجات", href: ROUTES.items, icon: Package2 },
     { title: "مساحة العمل", href: ROUTES.clubItems, icon: LayoutGrid },
   ],
 } as const;

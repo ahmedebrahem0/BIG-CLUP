@@ -15,14 +15,12 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   }, [error]);
 
   return (
-    <html lang="ar" dir="rtl">
-      <body className="bg-background p-6">
-        <ErrorMessage
-          description="حدث خطأ على مستوى التطبيق. أعد المحاولة أو ارجع للصفحة السابقة."
-          onRetry={reset}
-          title="تعذر تحميل لوحة التحكم"
-        />
-      </body>
-    </html>
+    <div className="bg-background p-6">
+      <ErrorMessage
+        description="حدث خطأ على مستوى التطبيق. أعد المحاولة أو ارجع للصفحة السابقة."
+        onRetry={reset}
+        title="تعذر تحميل لوحة التحكم"
+      />
+    </div>
   );
 }

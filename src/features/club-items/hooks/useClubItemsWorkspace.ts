@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useDeferredValue, useMemo, useState } from "react";
@@ -25,10 +25,26 @@ import type {
   ClubItemFormValues,
 } from "../types";
 
+type WorkspaceStatusFilter =
+  | "all"
+  | "all-completed"
+  | "has-pending"
+  | "none-completed"
+  | "mixed";
+
+type CompletedCountFilter = "all" | "0" | "1" | "2plus";
+type ChecklistMatchFilter = "all" | "checked" | "unchecked";
+
 export function useClubItemsWorkspace() {
   const [selectedClubId, setSelectedClubId] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [searchValue, setSearchValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState<WorkspaceStatusFilter>("all");
+  const [completedCountFilter, setCompletedCountFilter] =
+    useState<CompletedCountFilter>("all");
+  const [selectedChecklistNames, setSelectedChecklistNames] = useState<string[]>([]);
+  const [checklistMatchFilter, setChecklistMatchFilter] =
+    useState<ChecklistMatchFilter>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [clubItemBeingEdited, setClubItemBeingEdited] = useState<ClubItem | null>(null);
   const [pendingChecklistId, setPendingChecklistId] = useState<number | null>(null);
@@ -60,20 +76,139 @@ export function useClubItemsWorkspace() {
   const selectedCategory =
     clubCategories.find((category) => category.id === numericCategoryId) ?? null;
 
+  const checklistNameOptions = useMemo(() => {
+    return Array.from(
+      new Set(
+        clubItems.flatMap((clubItem) =>
+          clubItem.checklists.map((checklist) => checklist.checklist_name)
+        )
+      )
+    ).sort((a, b) => a.localeCompare(b, "ar"));
+  }, [clubItems]);
+
+  const clubItemInsights = useMemo(() => {
+    return clubItems.reduce(
+      (accumulator, clubItem) => {
+        const completedCount = clubItem.checklists.filter(
+          (checklist) => checklist.is_completed
+        ).length;
+        const totalCount = clubItem.checklists.length;
+        const hasPending = clubItem.checklists.some((checklist) => !checklist.is_completed);
+
+        accumulator.total += 1;
+
+        if (completedCount === 0) {
+          accumulator.noneCompleted += 1;
+        }
+
+        if (completedCount === 1) {
+          accumulator.exactlyOneCompleted += 1;
+        }
+
+        if (completedCount >= 2) {
+          accumulator.twoOrMoreCompleted += 1;
+        }
+
+        if (completedCount > 0) {
+          accumulator.anyCompleted += 1;
+        }
+
+        if (totalCount > 0 && completedCount === totalCount) {
+          accumulator.allCompleted += 1;
+        }
+
+        if (hasPending) {
+          accumulator.hasPending += 1;
+        }
+
+        if (completedCount > 0 && completedCount < totalCount) {
+          accumulator.mixed += 1;
+        }
+
+        return accumulator;
+      },
+      {
+        allCompleted: 0,
+        anyCompleted: 0,
+        exactlyOneCompleted: 0,
+        hasPending: 0,
+        mixed: 0,
+        noneCompleted: 0,
+        total: 0,
+        twoOrMoreCompleted: 0,
+      }
+    );
+  }, [clubItems]);
+
   const filteredClubItems = useMemo(() => {
     const normalizedQuery = deferredSearch.trim().toLowerCase();
 
-    if (!normalizedQuery) {
-      return clubItems;
-    }
-
     return clubItems.filter((clubItem) => {
-      return (
+      const completedCount = clubItem.checklists.filter(
+        (checklist) => checklist.is_completed
+      ).length;
+      const totalCount = clubItem.checklists.length;
+      const hasCompleted = completedCount > 0;
+      const hasPending = clubItem.checklists.some((checklist) => !checklist.is_completed);
+      const isAllCompleted = totalCount > 0 && completedCount === totalCount;
+      const isNoneCompleted = totalCount > 0 && completedCount === 0;
+      const isMixed = hasCompleted && hasPending;
+
+      const matchesSearch =
+        !normalizedQuery ||
         clubItem.item_code.toLowerCase().includes(normalizedQuery) ||
-        clubItem.item_description.toLowerCase().includes(normalizedQuery)
+        clubItem.item_description.toLowerCase().includes(normalizedQuery);
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "all-completed" && isAllCompleted) ||
+        (statusFilter === "has-pending" && hasPending) ||
+        (statusFilter === "none-completed" && isNoneCompleted) ||
+        (statusFilter === "mixed" && isMixed);
+
+      const matchesCompletedCount =
+        completedCountFilter === "all" ||
+        (completedCountFilter === "0" && completedCount === 0) ||
+        (completedCountFilter === "1" && completedCount === 1) ||
+        (completedCountFilter === "2plus" && completedCount >= 2);
+
+      const matchesSelectedChecklistNames =
+        selectedChecklistNames.length === 0 ||
+        selectedChecklistNames.every((selectedChecklistName) => {
+          const checklist = clubItem.checklists.find(
+            (entry) => entry.checklist_name === selectedChecklistName
+          );
+
+          if (!checklist) {
+            return false;
+          }
+
+          if (checklistMatchFilter === "all") {
+            return true;
+          }
+
+          if (checklistMatchFilter === "checked") {
+            return checklist.is_completed;
+          }
+
+          return !checklist.is_completed;
+        });
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesCompletedCount &&
+        matchesSelectedChecklistNames
       );
     });
-  }, [clubItems, deferredSearch]);
+  }, [
+    checklistMatchFilter,
+    clubItems,
+    completedCountFilter,
+    deferredSearch,
+    selectedChecklistNames,
+    statusFilter,
+  ]);
 
   const itemsForSelectedCategory = useMemo(() => {
     if (!numericCategoryId) {
@@ -87,17 +222,41 @@ export function useClubItemsWorkspace() {
   const formDefaultValues: ClubItemFormValues = mapClubItemToFormValues(clubItemBeingEdited);
   const isSubmitting = addOrUpdateItemInClubState.isLoading;
 
+  function resetFilters() {
+    setSearchValue("");
+    setStatusFilter("all");
+    setCompletedCountFilter("all");
+    setSelectedChecklistNames([]);
+    setChecklistMatchFilter("all");
+  }
+
+  function toggleChecklistNameSelection(checklistName: string) {
+    setSelectedChecklistNames((currentValue) => {
+      if (currentValue.includes(checklistName)) {
+        return currentValue.filter((value) => value !== checklistName);
+      }
+
+      return [...currentValue, checklistName];
+    });
+  }
+
+  function clearChecklistNameSelection() {
+    setSelectedChecklistNames([]);
+  }
+
   function handleClubChange(value: string) {
     setSelectedClubId(value);
     setSelectedCategoryId("");
     setClubItemBeingEdited(null);
     setIsFormOpen(false);
+    resetFilters();
   }
 
   function handleCategoryChange(value: string) {
     setSelectedCategoryId(value);
     setClubItemBeingEdited(null);
     setIsFormOpen(false);
+    resetFilters();
   }
 
   function openCreateForm() {
@@ -172,6 +331,10 @@ export function useClubItemsWorkspace() {
   }
 
   return {
+    checklistMatchFilter,
+    checklistNameOptions,
+    clearChecklistNameSelection,
+    clubItemInsights,
     clubCategories,
     clubCategoriesQuery,
     clubItemBeingEdited,
@@ -179,6 +342,7 @@ export function useClubItemsWorkspace() {
     clubItemsQuery,
     clubs,
     clubsQuery,
+    completedCountFilter,
     filteredClubItemsCount: filteredClubItems.length,
     formDefaultValues,
     formMode,
@@ -194,13 +358,20 @@ export function useClubItemsWorkspace() {
     openCreateForm,
     openEditQuantityForm,
     pendingChecklistId,
+    resetFilters,
     searchValue,
     selectedCategory,
     selectedCategoryId,
+    selectedChecklistNames,
     selectedClub,
     selectedClubId,
+    setChecklistMatchFilter,
+    setCompletedCountFilter,
     setSearchValue,
+    setStatusFilter,
+    statusFilter,
     submitClubItem,
+    toggleChecklistNameSelection,
     toggleChecklistStatus,
   };
 }

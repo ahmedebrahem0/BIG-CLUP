@@ -19,6 +19,8 @@ type ClubSelectorProps = {
 };
 
 export function ClubSelector({ clubs, onValueChange, value }: ClubSelectorProps) {
+  const selectedClub = clubs.find((club) => String(club.id) === value);
+
   return (
     <div className="rounded-[1.75rem] bg-white/80 p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
@@ -30,7 +32,9 @@ export function ClubSelector({ clubs, onValueChange, value }: ClubSelectorProps)
       </Label>
       <Select onValueChange={(nextValue) => onValueChange(nextValue ?? "")} value={value}>
         <SelectTrigger className="h-11 w-full rounded-2xl bg-background/70 px-4" id="club-selector">
-          <SelectValue placeholder="اختر النادي" />
+          <SelectValue placeholder="اختر النادي">
+            {selectedClub ? selectedClub.name : null}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {clubs.map((club) => (
