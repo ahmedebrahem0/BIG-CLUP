@@ -1,6 +1,6 @@
 "use client";
 
-import { PencilLine } from "lucide-react";
+import { FileText, PackageCheck, PencilLine, Truck } from "lucide-react";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,10 @@ import type { ClubItem, ClubItemChecklistEntry } from "../types";
 
 type ClubItemsTableProps = {
   clubItems: ClubItem[];
+  onConfirmReceipt: (clubItem: ClubItem) => void;
+  onEditNote: (clubItem: ClubItem) => void;
   onEditQuantity: (clubItem: ClubItem) => void;
+  onEditSuppliers: (clubItem: ClubItem) => void;
   onToggleChecklist: (checklist: ClubItemChecklistEntry, nextValue: boolean) => void;
   pendingChecklistId: number | null;
   selectedCategoryName?: string;
@@ -34,7 +37,10 @@ type ClubItemsTableProps = {
 
 export function ClubItemsTable({
   clubItems,
+  onConfirmReceipt,
+  onEditNote,
   onEditQuantity,
+  onEditSuppliers,
   onToggleChecklist,
   pendingChecklistId,
   selectedCategoryName,
@@ -60,7 +66,7 @@ export function ClubItemsTable({
         </CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
-        <Table className="min-w-[980px]">
+        <Table className="min-w-[1100px]">
           <TableHeader>
             <TableRow>
               <TableHead>الكود</TableHead>
@@ -78,7 +84,16 @@ export function ClubItemsTable({
             {clubItems.map((clubItem) => {
               const receivedQuantity = clubItem.received_quantity ?? 0;
               const remainingQuantity = Math.max(clubItem.quantity - receivedQuantity, 0);
-              const suppliersCount = clubItem.suppliers?.length ?? 0;
+              const areAllChecklistsCompleted =
+                clubItem.checklists.length > 0 &&
+                clubItem.checklists.every((checklist) => checklist.is_completed);
+              const isReceiptDisabled =
+                !areAllChecklistsCompleted || remainingQuantity <= 0;
+              const receiptButtonTitle = !areAllChecklistsCompleted
+                ? "أكمل جميع عناصر التشيك ليست أولًا."
+                : remainingQuantity <= 0
+                  ? "تم استلام الكمية المطلوبة بالكامل."
+                  : "تسجيل استلام جديد لهذا الصنف.";
 
               return (
                 <TableRow key={clubItem.id}>
@@ -102,7 +117,15 @@ export function ClubItemsTable({
                     </span>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {suppliersCount ? `${suppliersCount} مورد` : "لا يوجد"}
+                    {clubItem.suppliers?.length ? (
+                      <div className="flex flex-col gap-1">
+                        {clubItem.suppliers.map((supplier) => (
+                          <span key={supplier.id}>{supplier.name}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      "لا يوجد"
+                    )}
                   </TableCell>
                   <TableCell className="max-w-48 whitespace-normal text-sm leading-6 text-muted-foreground">
                     {clubItem.note?.trim() || "-"}
@@ -120,10 +143,41 @@ export function ClubItemsTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button onClick={() => onEditQuantity(clubItem)} size="sm" variant="outline">
-                      <PencilLine className="size-3.5" />
-                      تعديل الكمية
-                    </Button>
+                    <div className="flex min-w-56 flex-wrap gap-2">
+                      <Button
+                        onClick={() => onEditQuantity(clubItem)}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <PencilLine className="size-3.5" />
+                        تعديل الكمية
+                      </Button>
+                      <Button
+                        onClick={() => onEditNote(clubItem)}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <FileText className="size-3.5" />
+                        تعديل الملاحظة
+                      </Button>
+                      <Button
+                        onClick={() => onEditSuppliers(clubItem)}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <Truck className="size-3.5" />
+                        تعديل الموردين
+                      </Button>
+                      <Button
+                        disabled={isReceiptDisabled}
+                        onClick={() => onConfirmReceipt(clubItem)}
+                        size="sm"
+                        title={receiptButtonTitle}
+                      >
+                        <PackageCheck className="size-3.5" />
+                        تأكيد الطلب
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               );

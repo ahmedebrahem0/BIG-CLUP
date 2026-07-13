@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
   items: "/items/items/",
   suppliers: "/items/suppliers/",
   receipts: "/items/receipts/",
+  addReceipt: "/items/add-receipt/",
 
   clubCategories: (clubId: number) =>
     `/items/clubs/${clubId}/categories/`,

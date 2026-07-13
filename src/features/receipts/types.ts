@@ -6,3 +6,14 @@ export type Receipt = {
   supplier: string;
   created_at: string;
 };
+
+export type AddReceiptPayload = {
+  club_item: number;
+  supplier: number;
+  quantity_received: number;
+};
+
+export type AddReceiptResponse = {
+  message: string;
+  data: AddReceiptPayload;
+};

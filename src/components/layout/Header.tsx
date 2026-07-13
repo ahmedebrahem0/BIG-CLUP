@@ -42,7 +42,7 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-20 border-b border-white/60 bg-background/80 backdrop-blur-xl">
-      <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 xl:flex-row xl:items-center xl:justify-between">
+      <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 xl:flex-row xl:items-center xl:justify-between shadow-[0px_2px_1px_#585858]">
         <div className="flex items-center gap-3">
           <Button
             aria-label={isMobileSidebarOpen ? "Close navigation menu" : "Open navigation menu"}

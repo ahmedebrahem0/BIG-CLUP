@@ -6,7 +6,10 @@ export type ClubItemChecklistEntry = {
   updated_at: string;
 };
 
-export type ClubItemSupplier = Record<string, unknown>;
+export type ClubItemSupplier = {
+  id: number;
+  name: string;
+};
 
 export type ClubItem = {
   id: number;
@@ -24,6 +27,8 @@ export type ClubItem = {
 export type AddOrUpdateClubItemPayload = {
   item: number;
   quantity: number;
+  note?: string;
+  suppliers?: number[];
 };
 
 export type AddOrUpdateClubItemData = {
@@ -56,4 +61,6 @@ export type UpdateClubChecklistStatusResponse = {
 export type ClubItemFormValues = {
   item: string;
   quantity: string;
+  note: string;
+  suppliers: string[];
 };

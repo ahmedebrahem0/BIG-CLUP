@@ -6,6 +6,8 @@ export const clubItemSchema = z.object({
     .string()
     .min(1, "الكمية مطلوبة.")
     .refine((value) => Number(value) > 0, "الكمية يجب أن تكون أكبر من صفر."),
+  note: z.string(),
+  suppliers: z.array(z.string()),
 });
 
 export type ClubItemSchemaValues = z.infer<typeof clubItemSchema>;

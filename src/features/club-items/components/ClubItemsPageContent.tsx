@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowLeftRight,
@@ -25,6 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { AddReceiptForm } from "@/features/receipts/components/AddReceiptForm";
+
 import { AddOrUpdateClubItemForm } from "./AddOrUpdateClubItemForm";
 import { ClubCategorySelector } from "./ClubCategorySelector";
 import { ClubItemsTable } from "./ClubItemsTable";
@@ -38,6 +40,8 @@ export function ClubItemsPageContent() {
     clubCategoriesQuery,
     clearChecklistNameSelection,
     clubItemInsights,
+    clubItemEditTarget,
+    clubItemForReceipt,
     clubItems,
     clubItemsQuery,
     clubs,
@@ -49,15 +53,21 @@ export function ClubItemsPageContent() {
     handleCategoryChange,
     handleClubChange,
     handleFormOpenChange,
+    handleReceiptFormOpenChange,
     isFormOpen,
+    isReceiptFormOpen,
     isSubmitting,
+    isReceiptSubmitting,
     itemsAvailableToAdd,
     itemsForSelectedCategory,
     itemsQuery,
     numericCategoryId,
     numericClubId,
     openCreateForm,
+    openEditNoteForm,
     openEditQuantityForm,
+    openEditSuppliersForm,
+    openReceiptForm,
     pendingChecklistId,
     resetFilters,
     searchValue,
@@ -71,21 +81,25 @@ export function ClubItemsPageContent() {
     setStatusFilter,
     statusFilter,
     submitClubItem,
+    submitReceipt,
+    suppliers,
+    suppliersQuery,
     toggleChecklistNameSelection,
     toggleChecklistStatus,
   } = useClubItemsWorkspace();
 
-  if (clubsQuery.isLoading || itemsQuery.isLoading) {
+  if (clubsQuery.isLoading || itemsQuery.isLoading || suppliersQuery.isLoading) {
     return <Loader label="جاري تجهيز مساحة عمل الأندية..." />;
   }
 
-  if (clubsQuery.isError || itemsQuery.isError) {
+  if (clubsQuery.isError || itemsQuery.isError || suppliersQuery.isError) {
     return (
       <ErrorMessage
         description="تعذر تجهيز بيانات البداية لمساحة العمل من الباك اند."
         onRetry={() => {
           void clubsQuery.refetch();
           void itemsQuery.refetch();
+          void suppliersQuery.refetch();
         }}
         title="فشل تحميل مساحة العمل"
       />
@@ -392,7 +406,10 @@ export function ClubItemsPageContent() {
         ) : (
           <ClubItemsTable
             clubItems={clubItems}
+            onConfirmReceipt={openReceiptForm}
+            onEditNote={openEditNoteForm}
             onEditQuantity={openEditQuantityForm}
+            onEditSuppliers={openEditSuppliersForm}
             onToggleChecklist={toggleChecklistStatus}
             pendingChecklistId={pendingChecklistId}
             selectedCategoryName={selectedCategory?.name}
@@ -401,14 +418,23 @@ export function ClubItemsPageContent() {
         )}
       </div>
 
+      <AddReceiptForm
+        clubItem={clubItemForReceipt}
+        isOpen={isReceiptFormOpen}
+        isSubmitting={isReceiptSubmitting}
+        onOpenChange={handleReceiptFormOpenChange}
+        onSubmit={submitReceipt}
+      />
       <AddOrUpdateClubItemForm
         defaultValues={formDefaultValues}
+        editTarget={clubItemEditTarget}
         isOpen={isFormOpen}
         isSubmitting={isSubmitting}
         items={formMode === "create" ? itemsAvailableToAdd : itemsForSelectedCategory}
         mode={formMode}
         onOpenChange={handleFormOpenChange}
         onSubmit={submitClubItem}
+        suppliers={suppliers}
       />
     </>
   );

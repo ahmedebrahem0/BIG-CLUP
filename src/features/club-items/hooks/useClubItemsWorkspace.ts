@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useDeferredValue, useMemo, useState } from "react";
@@ -7,8 +7,12 @@ import { toast } from "sonner";
 import { useGetClubsQuery } from "@/features/clubs/clubsApi";
 import { useGetItemsQuery } from "@/features/items/itemsApi";
 import type { Item } from "@/features/items/types";
+import { useAddReceiptMutation } from "@/features/receipts/receiptsApi";
+import type { AddReceiptSchemaValues } from "@/features/receipts/schema/add-receipt.schema";
+import { useGetSuppliersQuery } from "@/features/suppliers/suppliersApi";
 import { handleApiError } from "@/lib/api/handleApiError";
 
+import type { ClubItemEditTarget } from "../components/AddOrUpdateClubItemForm";
 import {
   mapClubItemFormValuesToPayload,
   mapClubItemToFormValues,
@@ -44,11 +48,15 @@ export function useClubItemsWorkspace() {
   const [checklistNameSelection, setChecklistNameSelection] = useState<string[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [clubItemBeingEdited, setClubItemBeingEdited] = useState<ClubItem | null>(null);
+  const [clubItemEditTarget, setClubItemEditTarget] = useState<ClubItemEditTarget | null>(null);
+  const [clubItemForReceipt, setClubItemForReceipt] = useState<ClubItem | null>(null);
+  const [isReceiptFormOpen, setIsReceiptFormOpen] = useState(false);
   const [pendingChecklistId, setPendingChecklistId] = useState<number | null>(null);
   const deferredSearch = useDeferredValue(searchValue);
 
   const clubsQuery = useGetClubsQuery();
   const itemsQuery = useGetItemsQuery();
+  const suppliersQuery = useGetSuppliersQuery();
 
   const numericClubId = selectedClubId ? Number(selectedClubId) : null;
   const numericCategoryId = selectedCategoryId ? Number(selectedCategoryId) : null;
@@ -64,6 +72,7 @@ export function useClubItemsWorkspace() {
   const [addOrUpdateItemInClub, addOrUpdateItemInClubState] =
     useAddOrUpdateItemInClubMutation();
   const [updateClubChecklistStatus] = useUpdateClubChecklistStatusMutation();
+  const [addReceipt, addReceiptState] = useAddReceiptMutation();
 
   const clubs = clubsQuery.data ?? [];
   const clubCategories = useMemo(
@@ -71,6 +80,7 @@ export function useClubItemsWorkspace() {
     [clubCategoriesQuery.data]
   );
   const items = useMemo(() => itemsQuery.data ?? [], [itemsQuery.data]);
+  const suppliers = useMemo(() => suppliersQuery.data ?? [], [suppliersQuery.data]);
   const clubItems = useMemo(() => clubItemsQuery.data ?? [], [clubItemsQuery.data]);
 
   const selectedClub = clubs.find((club) => club.id === numericClubId) ?? null;
@@ -221,6 +231,7 @@ export function useClubItemsWorkspace() {
   const formMode: "create" | "edit" = clubItemBeingEdited ? "edit" : "create";
   const formDefaultValues: ClubItemFormValues = mapClubItemToFormValues(clubItemBeingEdited);
   const isSubmitting = addOrUpdateItemInClubState.isLoading;
+  const isReceiptSubmitting = addReceiptState.isLoading;
 
   function resetFilters() {
     setSearchValue("");
@@ -251,30 +262,51 @@ export function useClubItemsWorkspace() {
     setSelectedClubId(value);
     setSelectedCategoryId("");
     setClubItemBeingEdited(null);
+    setClubItemEditTarget(null);
     setIsFormOpen(false);
+    setClubItemForReceipt(null);
+    setIsReceiptFormOpen(false);
     resetFilters();
   }
 
   function handleCategoryChange(value: string) {
     setSelectedCategoryId(value);
     setClubItemBeingEdited(null);
+    setClubItemEditTarget(null);
     setIsFormOpen(false);
+    setClubItemForReceipt(null);
+    setIsReceiptFormOpen(false);
     resetFilters();
   }
 
   function openCreateForm() {
     setClubItemBeingEdited(null);
+    setClubItemEditTarget(null);
     setIsFormOpen(true);
   }
 
   function openEditQuantityForm(clubItem: ClubItem) {
     setClubItemBeingEdited(clubItem);
+    setClubItemEditTarget("quantity");
+    setIsFormOpen(true);
+  }
+
+  function openEditNoteForm(clubItem: ClubItem) {
+    setClubItemBeingEdited(clubItem);
+    setClubItemEditTarget("note");
+    setIsFormOpen(true);
+  }
+
+  function openEditSuppliersForm(clubItem: ClubItem) {
+    setClubItemBeingEdited(clubItem);
+    setClubItemEditTarget("suppliers");
     setIsFormOpen(true);
   }
 
   function closeForm() {
     setIsFormOpen(false);
     setClubItemBeingEdited(null);
+    setClubItemEditTarget(null);
   }
 
   function handleFormOpenChange(open: boolean) {
@@ -286,6 +318,66 @@ export function useClubItemsWorkspace() {
     closeForm();
   }
 
+  function openReceiptForm(clubItem: ClubItem) {
+    const allChecklistsCompleted =
+      clubItem.checklists.length > 0 &&
+      clubItem.checklists.every((checklist) => checklist.is_completed);
+    const remainingQuantity = Math.max(
+      clubItem.quantity - (clubItem.received_quantity ?? 0),
+      0
+    );
+
+    if (!allChecklistsCompleted) {
+      toast.error("أكمل جميع عناصر التشيك ليست قبل تأكيد الطلب.");
+      return;
+    }
+
+    if (remainingQuantity <= 0) {
+      toast.error("تم استلام الكمية المطلوبة بالكامل.");
+      return;
+    }
+
+    setClubItemForReceipt(clubItem);
+    setIsReceiptFormOpen(true);
+  }
+
+  function closeReceiptForm() {
+    setIsReceiptFormOpen(false);
+    setClubItemForReceipt(null);
+  }
+
+  function handleReceiptFormOpenChange(open: boolean) {
+    if (open) {
+      setIsReceiptFormOpen(true);
+      return;
+    }
+
+    closeReceiptForm();
+  }
+
+  async function submitReceipt(values: AddReceiptSchemaValues) {
+    if (!clubItemForReceipt || !numericClubId || !numericCategoryId) {
+      toast.error("تعذر تحديد بيانات الصنف المطلوب استلامه.");
+      return;
+    }
+
+    try {
+      const response = await addReceipt({
+        body: {
+          club_item: clubItemForReceipt.id,
+          supplier: Number(values.supplier),
+          quantity_received: Number(values.quantity_received),
+        },
+        categoryId: numericCategoryId,
+        clubId: numericClubId,
+      }).unwrap();
+
+      toast.success(response.message);
+      closeReceiptForm();
+    } catch (error) {
+      toast.error(handleApiError(error));
+    }
+  }
   async function submitClubItem(values: ClubItemFormValues) {
     if (!numericClubId) {
       toast.error("اختر النادي أولًا.");
@@ -340,6 +432,8 @@ export function useClubItemsWorkspace() {
     clearChecklistNameSelection,
     clubItemInsights,
     clubItemBeingEdited,
+    clubItemEditTarget,
+    clubItemForReceipt,
     clubItems: filteredClubItems,
     clubItemsQuery,
     clubs,
@@ -351,15 +445,21 @@ export function useClubItemsWorkspace() {
     handleCategoryChange,
     handleClubChange,
     handleFormOpenChange,
+    handleReceiptFormOpenChange,
     isFormOpen,
+    isReceiptFormOpen,
     isSubmitting,
+    isReceiptSubmitting,
     itemsAvailableToAdd,
     itemsForSelectedCategory,
     itemsQuery,
     numericCategoryId,
     numericClubId,
     openCreateForm,
+    openEditNoteForm,
     openEditQuantityForm,
+    openEditSuppliersForm,
+    openReceiptForm,
     pendingChecklistId,
     resetFilters,
     searchValue,
@@ -373,6 +473,9 @@ export function useClubItemsWorkspace() {
     setStatusFilter,
     statusFilter,
     submitClubItem,
+    suppliers,
+    suppliersQuery,
+    submitReceipt,
     toggleChecklistNameSelection,
     toggleChecklistStatus,
   };
