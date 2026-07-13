@@ -106,24 +106,32 @@ export function AddReceiptForm({
               <Controller
                 control={control}
                 name="supplier"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger
-                      className="h-12 w-full rounded-2xl bg-background/70 px-4"
-                      disabled={!clubItem?.suppliers.length}
-                      id="receipt-supplier"
-                    >
-                      <SelectValue placeholder="اختر المورد" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clubItem?.suppliers.map((supplier) => (
-                        <SelectItem key={supplier.id} value={String(supplier.id)}>
-                          {supplier.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                render={({ field }) => {
+                  const selectedSupplier = clubItem?.suppliers.find(
+                    (supplier) => String(supplier.id) === field.value
+                  );
+
+                  return (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger
+                        className="h-12 w-full rounded-2xl bg-background/70 px-4"
+                        disabled={!clubItem?.suppliers.length}
+                        id="receipt-supplier"
+                      >
+                        <SelectValue placeholder="اختر المورد">
+                          {selectedSupplier?.name ?? "اختر المورد"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clubItem?.suppliers.map((supplier) => (
+                          <SelectItem key={supplier.id} value={String(supplier.id)}>
+                            {supplier.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  );
+                }}
               />
               {errors.supplier ? (
                 <p className="text-sm text-destructive">{errors.supplier.message}</p>
