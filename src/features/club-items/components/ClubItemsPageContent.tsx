@@ -33,12 +33,11 @@ import { useClubItemsWorkspace } from "../hooks/useClubItemsWorkspace";
 
 export function ClubItemsPageContent() {
   const {
-    checklistMatchFilter,
     checklistNameOptions,
-    clearChecklistNameSelection,
-    clubItemInsights,
     clubCategories,
     clubCategoriesQuery,
+    clearChecklistNameSelection,
+    clubItemInsights,
     clubItems,
     clubItemsQuery,
     clubs,
@@ -52,6 +51,7 @@ export function ClubItemsPageContent() {
     handleFormOpenChange,
     isFormOpen,
     isSubmitting,
+    itemsAvailableToAdd,
     itemsForSelectedCategory,
     itemsQuery,
     numericCategoryId,
@@ -66,7 +66,6 @@ export function ClubItemsPageContent() {
     selectedChecklistNames,
     selectedClub,
     selectedClubId,
-    setChecklistMatchFilter,
     setCompletedCountFilter,
     setSearchValue,
     setStatusFilter,
@@ -118,16 +117,16 @@ export function ClubItemsPageContent() {
                 إضافة صنف للنادي
               </div>
               <p className="text-sm leading-7 text-muted-foreground">
-                بعد اختيار النادي والفئة، يمكن ربط الصنف بالكمية المطلوبة أو تعديل الكمية
-                الحالية مباشرة من نفس الخطوة.
+                بعد اختيار النادي والفئة، يمكن ربط صنف جديد فقط. تعديل الكمية يتم من زر
+                تعديل الكمية داخل الصف الموجود.
               </p>
               <Button
                 className="mt-4 h-11 w-full rounded-2xl"
-                disabled={!numericClubId || !numericCategoryId || !itemsForSelectedCategory.length}
+                disabled={!numericClubId || !numericCategoryId}
                 onClick={openCreateForm}
               >
                 <PackagePlus className="size-4" />
-                إضافة أو تحديث صنف
+                إضافة صنف
               </Button>
             </div>
           </CardContent>
@@ -172,8 +171,8 @@ export function ClubItemsPageContent() {
                 <div>
                   <CardTitle>بحث وفلترة داخل مساحة العمل</CardTitle>
                   <CardDescription>
-                    فلترة سريعة جدًا على البيانات المحملة: حسب الحالة، وعدد العناصر المكتملة،
-                    أو أكثر من checklist بالاسم نفسه والحالة التي تحددها.
+                    ابدأ بحالة التنفيذ وعدد الخطوات المكتملة، ثم ضيّق النتائج باختيار اسم
+                    أو أكثر من التشيك ليست.
                   </CardDescription>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -193,7 +192,7 @@ export function ClubItemsPageContent() {
                 </div>
               </div>
 
-              <div className="grid gap-3 xl:grid-cols-3">
+              <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-foreground/80">حالة التنفيذ</p>
                   <Select onValueChange={(value) => setStatusFilter(value as typeof statusFilter)} value={statusFilter}>
@@ -228,22 +227,6 @@ export function ClubItemsPageContent() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-foreground/80">حالة الأسماء المحددة</p>
-                  <Select
-                    onValueChange={(value) => setChecklistMatchFilter(value as typeof checklistMatchFilter)}
-                    value={checklistMatchFilter}
-                  >
-                    <SelectTrigger className="h-11 w-full rounded-2xl bg-background/70 px-4">
-                      <SelectValue placeholder="حالة الأسماء المحددة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">أي حالة</SelectItem>
-                      <SelectItem value="checked">المعلم عليها صح فقط</SelectItem>
-                      <SelectItem value="unchecked">غير المعلم عليها فقط</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
 
               <div className="rounded-[1.5rem] border border-border/60 bg-background/70 p-4">
@@ -251,7 +234,8 @@ export function ClubItemsPageContent() {
                   <div>
                     <p className="text-sm font-medium text-foreground/80">اختيار أسماء التشيك ليست</p>
                     <p className="text-xs text-muted-foreground">
-                      اختر اسمًا واحدًا أو أكثر. سيتم عرض الأصناف التي تحقق كل الأسماء المحددة.
+                      الأسماء المتاحة مبنية على النتائج الحالية. اختر اسمًا واحدًا أو أكثر
+                      لعرض الأصناف التي تحتوي على كل الأسماء المحددة.
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -370,20 +354,28 @@ export function ClubItemsPageContent() {
 
         {showClubPrompt ? (
           <EmptyState
-            description="ابدأ أولًا باختيار النادي حتى نتمكن من جلب الفئات المرتبطة به ومساحة العمل الخاصة به."
+            description="ابدأ أولًا باختيار النادي، ثم اختر أي فئة لإضافة صنف جديد أو متابعة الأصناف المرتبطة به."
             title="اختر النادي للمتابعة"
           />
         ) : showCategoryPrompt ? (
           clubCategoriesQuery.isFetching ? (
-            <Loader label="جاري تحميل الفئات المرتبطة بالنادي..." />
+            <Loader label="جاري تحميل فئات النادي..." />
+          ) : clubCategoriesQuery.isError ? (
+            <ErrorMessage
+              description="تعذر جلب فئات النادي المختار من الباك اند."
+              onRetry={() => {
+                void clubCategoriesQuery.refetch();
+              }}
+              title="فشل تحميل فئات النادي"
+            />
           ) : clubCategories.length ? (
             <EmptyState
-              description="اختر فئة من الفئات المرتبطة بهذا النادي حتى نعرض الأصناف الخاصة بها."
+              description="اختر فئة من فئات النادي لعرض الأصناف المرتبطة بها أو إضافة صنف جديد داخلها."
               title="اختر الفئة للمتابعة"
             />
           ) : (
             <EmptyState
-              description="هذا النادي لا يحتوي حاليًا على فئات مرتبطة عبر Club Items. أضف ربطًا أولًا من خلال البيانات التشغيلية أو راجع الباك اند."
+              description="هذا النادي لا يحتوي حاليًا على فئات مرتبطة عبر Club Items."
               title="لا توجد فئات مرتبطة بهذا النادي"
             />
           )
@@ -413,7 +405,7 @@ export function ClubItemsPageContent() {
         defaultValues={formDefaultValues}
         isOpen={isFormOpen}
         isSubmitting={isSubmitting}
-        items={itemsForSelectedCategory}
+        items={formMode === "create" ? itemsAvailableToAdd : itemsForSelectedCategory}
         mode={formMode}
         onOpenChange={handleFormOpenChange}
         onSubmit={submitClubItem}

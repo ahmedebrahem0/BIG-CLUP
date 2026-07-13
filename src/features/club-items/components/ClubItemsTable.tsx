@@ -59,49 +59,75 @@ export function ClubItemsTable({
             : "عرض تشغيلي للأصناف المرتبطة بالنادي والفئة المختارين."}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Table>
+      <CardContent className="overflow-x-auto">
+        <Table className="min-w-[980px]">
           <TableHeader>
             <TableRow>
               <TableHead>الكود</TableHead>
               <TableHead>الوصف</TableHead>
               <TableHead>الكمية</TableHead>
+              <TableHead>المستلم</TableHead>
+              <TableHead>المتبقي</TableHead>
+              <TableHead>الموردين</TableHead>
+              <TableHead>ملاحظات</TableHead>
               <TableHead>التشيك ليست الخاصة بالنادي</TableHead>
               <TableHead>العمليات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clubItems.map((clubItem) => (
-              <TableRow key={clubItem.id}>
-                <TableCell className="font-medium">{clubItem.item_code}</TableCell>
-                <TableCell className="max-w-sm whitespace-normal text-sm leading-6 text-muted-foreground">
-                  {clubItem.item_description}
-                </TableCell>
-                <TableCell>
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
-                    {clubItem.quantity}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <div className="flex max-w-lg flex-wrap gap-2">
-                    {clubItem.checklists.map((checklist) => (
-                      <ClubItemChecklistStatus
-                        checklist={checklist}
-                        isPending={pendingChecklistId === checklist.id}
-                        key={checklist.id}
-                        onToggle={onToggleChecklist}
-                      />
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Button onClick={() => onEditQuantity(clubItem)} size="sm" variant="outline">
-                    <PencilLine className="size-3.5" />
-                    تعديل الكمية
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {clubItems.map((clubItem) => {
+              const receivedQuantity = clubItem.received_quantity ?? 0;
+              const remainingQuantity = Math.max(clubItem.quantity - receivedQuantity, 0);
+              const suppliersCount = clubItem.suppliers?.length ?? 0;
+
+              return (
+                <TableRow key={clubItem.id}>
+                  <TableCell className="font-medium">{clubItem.item_code}</TableCell>
+                  <TableCell className="max-w-sm whitespace-normal text-sm leading-6 text-muted-foreground">
+                    {clubItem.item_description}
+                  </TableCell>
+                  <TableCell>
+                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
+                      {clubItem.quantity}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs text-emerald-700">
+                      {receivedQuantity}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="rounded-full bg-amber-50 px-3 py-1 text-xs text-amber-700">
+                      {remainingQuantity}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {suppliersCount ? `${suppliersCount} مورد` : "لا يوجد"}
+                  </TableCell>
+                  <TableCell className="max-w-48 whitespace-normal text-sm leading-6 text-muted-foreground">
+                    {clubItem.note?.trim() || "-"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex max-w-lg flex-wrap gap-2">
+                      {clubItem.checklists.map((checklist) => (
+                        <ClubItemChecklistStatus
+                          checklist={checklist}
+                          isPending={pendingChecklistId === checklist.id}
+                          key={checklist.id}
+                          onToggle={onToggleChecklist}
+                        />
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button onClick={() => onEditQuantity(clubItem)} size="sm" variant="outline">
+                      <PencilLine className="size-3.5" />
+                      تعديل الكمية
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>

@@ -3,6 +3,8 @@ export const QUERY_TAGS = {
   CATEGORIES: "Categories",
   CHECKLISTS: "Checklists",
   ITEMS: "Items",
+  SUPPLIERS: "Suppliers",
+  RECEIPTS: "Receipts",
   CLUB_CATEGORIES: "ClubCategories",
   CLUB_ITEMS: "ClubItems",
 } as const;

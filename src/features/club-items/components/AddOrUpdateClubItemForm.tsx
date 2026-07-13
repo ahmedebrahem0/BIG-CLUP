@@ -72,12 +72,19 @@ export function AddOrUpdateClubItemForm({
             </DialogTitle>
             <DialogDescription className="leading-7">
               {mode === "create"
-                ? "اختر الصنف وحدد الكمية ليتم ربطه بهذا النادي أو تحديثه إذا كان موجودًا بالفعل."
-                : "حدّث الكمية الحالية لهذا الصنف داخل النادي. نفس الـ endpoint ستقوم بعملية upsert."}
+                ? "اختر صنفًا غير مرتبط بهذا النادي بعد، ثم حدد الكمية المطلوبة لإضافته."
+                : "حدّث الكمية الحالية لهذا الصنف داخل النادي. "}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5 px-6 py-6">
+            {mode === "create" && !items.length ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-800">
+                لا توجد أصناف جديدة متاحة للإضافة داخل هذه الفئة. لو الصنف موجود بالفعل
+                في النادي، استخدم زر تعديل الكمية من صف الصنف.
+              </div>
+            ) : null}
+
             <div className="space-y-2">
               <Label htmlFor="club-item-item">الصنف</Label>
               <Controller
@@ -135,7 +142,7 @@ export function AddOrUpdateClubItemForm({
                   جاري الحفظ
                 </>
               ) : mode === "create" ? (
-                "إضافة أو تحديث الصنف"
+                "إضافة الصنف"
               ) : (
                 "حفظ الكمية"
               )}
@@ -146,4 +153,3 @@ export function AddOrUpdateClubItemForm({
     </Dialog>
   );
 }
-

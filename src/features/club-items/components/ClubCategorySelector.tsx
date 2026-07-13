@@ -42,7 +42,7 @@ export function ClubCategorySelector({
           disabled={disabled}
           id="club-category-selector"
         >
-          <SelectValue placeholder="اختر الفئة التابعة للنادي">
+          <SelectValue placeholder="اختر الفئة">
             {selectedCategory ? selectedCategory.name : null}
           </SelectValue>
         </SelectTrigger>

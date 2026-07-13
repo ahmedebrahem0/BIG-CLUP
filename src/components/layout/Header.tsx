@@ -153,14 +153,14 @@ export function Header({
             {/* <Button size="icon" variant="outline">
               <Settings2 className="size-4" />
             </Button> */}
-            <div className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/70 px-3 py-2 shadow-sm">
+            {/* <div className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/70 px-3 py-2 shadow-sm">
               <div className="text-right">
                 <p className="text-sm font-semibold">فريق الإدارة</p>
               </div>
               <div className="flex size-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
                 DA
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

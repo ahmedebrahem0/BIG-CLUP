@@ -33,7 +33,6 @@ type WorkspaceStatusFilter =
   | "mixed";
 
 type CompletedCountFilter = "all" | "0" | "1" | "2plus";
-type ChecklistMatchFilter = "all" | "checked" | "unchecked";
 
 export function useClubItemsWorkspace() {
   const [selectedClubId, setSelectedClubId] = useState("");
@@ -42,9 +41,7 @@ export function useClubItemsWorkspace() {
   const [statusFilter, setStatusFilter] = useState<WorkspaceStatusFilter>("all");
   const [completedCountFilter, setCompletedCountFilter] =
     useState<CompletedCountFilter>("all");
-  const [selectedChecklistNames, setSelectedChecklistNames] = useState<string[]>([]);
-  const [checklistMatchFilter, setChecklistMatchFilter] =
-    useState<ChecklistMatchFilter>("all");
+  const [checklistNameSelection, setChecklistNameSelection] = useState<string[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [clubItemBeingEdited, setClubItemBeingEdited] = useState<ClubItem | null>(null);
   const [pendingChecklistId, setPendingChecklistId] = useState<number | null>(null);
@@ -57,6 +54,7 @@ export function useClubItemsWorkspace() {
   const numericCategoryId = selectedCategoryId ? Number(selectedCategoryId) : null;
 
   const clubCategoriesQuery = useGetClubCategoriesQuery(numericClubId ?? skipToken);
+
   const clubItemsQuery = useGetClubItemsByCategoryQuery(
     numericClubId && numericCategoryId
       ? { clubId: numericClubId, categoryId: numericCategoryId }
@@ -68,23 +66,16 @@ export function useClubItemsWorkspace() {
   const [updateClubChecklistStatus] = useUpdateClubChecklistStatusMutation();
 
   const clubs = clubsQuery.data ?? [];
-  const items = itemsQuery.data ?? [];
-  const clubCategories = clubCategoriesQuery.data ?? [];
-  const clubItems = clubItemsQuery.data ?? [];
+  const clubCategories = useMemo(
+    () => clubCategoriesQuery.data ?? [],
+    [clubCategoriesQuery.data]
+  );
+  const items = useMemo(() => itemsQuery.data ?? [], [itemsQuery.data]);
+  const clubItems = useMemo(() => clubItemsQuery.data ?? [], [clubItemsQuery.data]);
 
   const selectedClub = clubs.find((club) => club.id === numericClubId) ?? null;
   const selectedCategory =
     clubCategories.find((category) => category.id === numericCategoryId) ?? null;
-
-  const checklistNameOptions = useMemo(() => {
-    return Array.from(
-      new Set(
-        clubItems.flatMap((clubItem) =>
-          clubItem.checklists.map((checklist) => checklist.checklist_name)
-        )
-      )
-    ).sort((a, b) => a.localeCompare(b, "ar"));
-  }, [clubItems]);
 
   const clubItemInsights = useMemo(() => {
     return clubItems.reduce(
@@ -140,7 +131,7 @@ export function useClubItemsWorkspace() {
     );
   }, [clubItems]);
 
-  const filteredClubItems = useMemo(() => {
+  const itemsMatchingPrimaryFilters = useMemo(() => {
     const normalizedQuery = deferredSearch.trim().toLowerCase();
 
     return clubItems.filter((clubItem) => {
@@ -172,43 +163,46 @@ export function useClubItemsWorkspace() {
         (completedCountFilter === "1" && completedCount === 1) ||
         (completedCountFilter === "2plus" && completedCount >= 2);
 
-      const matchesSelectedChecklistNames =
-        selectedChecklistNames.length === 0 ||
-        selectedChecklistNames.every((selectedChecklistName) => {
-          const checklist = clubItem.checklists.find(
-            (entry) => entry.checklist_name === selectedChecklistName
-          );
-
-          if (!checklist) {
-            return false;
-          }
-
-          if (checklistMatchFilter === "all") {
-            return true;
-          }
-
-          if (checklistMatchFilter === "checked") {
-            return checklist.is_completed;
-          }
-
-          return !checklist.is_completed;
-        });
-
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesCompletedCount &&
-        matchesSelectedChecklistNames
-      );
+      return matchesSearch && matchesStatus && matchesCompletedCount;
     });
   }, [
-    checklistMatchFilter,
     clubItems,
     completedCountFilter,
     deferredSearch,
-    selectedChecklistNames,
     statusFilter,
   ]);
+
+  const checklistNameOptions = useMemo(() => {
+    return Array.from(
+      new Set(
+        itemsMatchingPrimaryFilters.flatMap((clubItem) =>
+          clubItem.checklists.map((checklist) => checklist.checklist_name)
+        )
+      )
+    ).sort((a, b) => a.localeCompare(b, "ar"));
+  }, [itemsMatchingPrimaryFilters]);
+
+  const selectedChecklistNames = useMemo(
+    () =>
+      checklistNameSelection.filter((checklistName) =>
+        checklistNameOptions.includes(checklistName)
+      ),
+    [checklistNameOptions, checklistNameSelection]
+  );
+
+  const filteredClubItems = useMemo(() => {
+    if (selectedChecklistNames.length === 0) {
+      return itemsMatchingPrimaryFilters;
+    }
+
+    return itemsMatchingPrimaryFilters.filter((clubItem) =>
+      selectedChecklistNames.every((selectedChecklistName) =>
+        clubItem.checklists.some(
+          (checklist) => checklist.checklist_name === selectedChecklistName
+        )
+      )
+    );
+  }, [itemsMatchingPrimaryFilters, selectedChecklistNames]);
 
   const itemsForSelectedCategory = useMemo(() => {
     if (!numericCategoryId) {
@@ -218,6 +212,12 @@ export function useClubItemsWorkspace() {
     return items.filter((item) => item.category === numericCategoryId);
   }, [items, numericCategoryId]);
 
+  const itemsAvailableToAdd = useMemo(() => {
+    const linkedItemIds = new Set(clubItems.map((clubItem) => clubItem.item));
+
+    return itemsForSelectedCategory.filter((item) => !linkedItemIds.has(item.id));
+  }, [clubItems, itemsForSelectedCategory]);
+
   const formMode: "create" | "edit" = clubItemBeingEdited ? "edit" : "create";
   const formDefaultValues: ClubItemFormValues = mapClubItemToFormValues(clubItemBeingEdited);
   const isSubmitting = addOrUpdateItemInClubState.isLoading;
@@ -226,22 +226,25 @@ export function useClubItemsWorkspace() {
     setSearchValue("");
     setStatusFilter("all");
     setCompletedCountFilter("all");
-    setSelectedChecklistNames([]);
-    setChecklistMatchFilter("all");
+    setChecklistNameSelection([]);
   }
 
   function toggleChecklistNameSelection(checklistName: string) {
-    setSelectedChecklistNames((currentValue) => {
-      if (currentValue.includes(checklistName)) {
-        return currentValue.filter((value) => value !== checklistName);
+    setChecklistNameSelection((currentValue) => {
+      const availableCurrentValue = currentValue.filter((value) =>
+        checklistNameOptions.includes(value)
+      );
+
+      if (availableCurrentValue.includes(checklistName)) {
+        return availableCurrentValue.filter((value) => value !== checklistName);
       }
 
-      return [...currentValue, checklistName];
+      return [...availableCurrentValue, checklistName];
     });
   }
 
   function clearChecklistNameSelection() {
-    setSelectedChecklistNames([]);
+    setChecklistNameSelection([]);
   }
 
   function handleClubChange(value: string) {
@@ -331,12 +334,11 @@ export function useClubItemsWorkspace() {
   }
 
   return {
-    checklistMatchFilter,
     checklistNameOptions,
-    clearChecklistNameSelection,
-    clubItemInsights,
     clubCategories,
     clubCategoriesQuery,
+    clearChecklistNameSelection,
+    clubItemInsights,
     clubItemBeingEdited,
     clubItems: filteredClubItems,
     clubItemsQuery,
@@ -351,6 +353,7 @@ export function useClubItemsWorkspace() {
     handleFormOpenChange,
     isFormOpen,
     isSubmitting,
+    itemsAvailableToAdd,
     itemsForSelectedCategory,
     itemsQuery,
     numericCategoryId,
@@ -365,7 +368,6 @@ export function useClubItemsWorkspace() {
     selectedChecklistNames,
     selectedClub,
     selectedClubId,
-    setChecklistMatchFilter,
     setCompletedCountFilter,
     setSearchValue,
     setStatusFilter,
