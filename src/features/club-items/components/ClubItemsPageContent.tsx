@@ -40,7 +40,6 @@ export function ClubItemsPageContent() {
     clubCategoriesQuery,
     clearChecklistNameSelection,
     clubItemInsights,
-    clubItemEditTarget,
     clubItemForReceipt,
     clubItems,
     clubItemsQuery,
@@ -64,9 +63,7 @@ export function ClubItemsPageContent() {
     numericCategoryId,
     numericClubId,
     openCreateForm,
-    openEditNoteForm,
-    openEditQuantityForm,
-    openEditSuppliersForm,
+    openEditClubItemForm,
     openReceiptForm,
     pendingChecklistId,
     resetFilters,
@@ -131,8 +128,7 @@ export function ClubItemsPageContent() {
                 إضافة صنف للنادي
               </div>
               <p className="text-sm leading-7 text-muted-foreground">
-                بعد اختيار النادي والفئة، يمكن ربط صنف جديد فقط. تعديل الكمية يتم من زر
-                تعديل الكمية داخل الصف الموجود.
+                بعد اختيار النادي والفئة، يمكن ربط صنف جديد فقط. تعديل بيانات الصنف يتم من زر تعديل البيانات داخل الصف الموجود.
               </p>
               <Button
                 className="mt-4 h-11 w-full rounded-2xl"
@@ -407,9 +403,7 @@ export function ClubItemsPageContent() {
           <ClubItemsTable
             clubItems={clubItems}
             onConfirmReceipt={openReceiptForm}
-            onEditNote={openEditNoteForm}
-            onEditQuantity={openEditQuantityForm}
-            onEditSuppliers={openEditSuppliersForm}
+            onEditClubItem={openEditClubItemForm}
             onToggleChecklist={toggleChecklistStatus}
             pendingChecklistId={pendingChecklistId}
             selectedCategoryName={selectedCategory?.name}
@@ -427,7 +421,6 @@ export function ClubItemsPageContent() {
       />
       <AddOrUpdateClubItemForm
         defaultValues={formDefaultValues}
-        editTarget={clubItemEditTarget}
         isOpen={isFormOpen}
         isSubmitting={isSubmitting}
         items={formMode === "create" ? itemsAvailableToAdd : itemsForSelectedCategory}

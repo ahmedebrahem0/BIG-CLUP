@@ -12,7 +12,6 @@ import type { AddReceiptSchemaValues } from "@/features/receipts/schema/add-rece
 import { useGetSuppliersQuery } from "@/features/suppliers/suppliersApi";
 import { handleApiError } from "@/lib/api/handleApiError";
 
-import type { ClubItemEditTarget } from "../components/AddOrUpdateClubItemForm";
 import {
   mapClubItemFormValuesToPayload,
   mapClubItemToFormValues,
@@ -48,7 +47,6 @@ export function useClubItemsWorkspace() {
   const [checklistNameSelection, setChecklistNameSelection] = useState<string[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [clubItemBeingEdited, setClubItemBeingEdited] = useState<ClubItem | null>(null);
-  const [clubItemEditTarget, setClubItemEditTarget] = useState<ClubItemEditTarget | null>(null);
   const [clubItemForReceipt, setClubItemForReceipt] = useState<ClubItem | null>(null);
   const [isReceiptFormOpen, setIsReceiptFormOpen] = useState(false);
   const [pendingChecklistId, setPendingChecklistId] = useState<number | null>(null);
@@ -262,7 +260,6 @@ export function useClubItemsWorkspace() {
     setSelectedClubId(value);
     setSelectedCategoryId("");
     setClubItemBeingEdited(null);
-    setClubItemEditTarget(null);
     setIsFormOpen(false);
     setClubItemForReceipt(null);
     setIsReceiptFormOpen(false);
@@ -272,7 +269,6 @@ export function useClubItemsWorkspace() {
   function handleCategoryChange(value: string) {
     setSelectedCategoryId(value);
     setClubItemBeingEdited(null);
-    setClubItemEditTarget(null);
     setIsFormOpen(false);
     setClubItemForReceipt(null);
     setIsReceiptFormOpen(false);
@@ -281,32 +277,17 @@ export function useClubItemsWorkspace() {
 
   function openCreateForm() {
     setClubItemBeingEdited(null);
-    setClubItemEditTarget(null);
     setIsFormOpen(true);
   }
 
-  function openEditQuantityForm(clubItem: ClubItem) {
+  function openEditClubItemForm(clubItem: ClubItem) {
     setClubItemBeingEdited(clubItem);
-    setClubItemEditTarget("quantity");
-    setIsFormOpen(true);
-  }
-
-  function openEditNoteForm(clubItem: ClubItem) {
-    setClubItemBeingEdited(clubItem);
-    setClubItemEditTarget("note");
-    setIsFormOpen(true);
-  }
-
-  function openEditSuppliersForm(clubItem: ClubItem) {
-    setClubItemBeingEdited(clubItem);
-    setClubItemEditTarget("suppliers");
     setIsFormOpen(true);
   }
 
   function closeForm() {
     setIsFormOpen(false);
     setClubItemBeingEdited(null);
-    setClubItemEditTarget(null);
   }
 
   function handleFormOpenChange(open: boolean) {
@@ -432,7 +413,6 @@ export function useClubItemsWorkspace() {
     clearChecklistNameSelection,
     clubItemInsights,
     clubItemBeingEdited,
-    clubItemEditTarget,
     clubItemForReceipt,
     clubItems: filteredClubItems,
     clubItemsQuery,
@@ -456,9 +436,7 @@ export function useClubItemsWorkspace() {
     numericCategoryId,
     numericClubId,
     openCreateForm,
-    openEditNoteForm,
-    openEditQuantityForm,
-    openEditSuppliersForm,
+    openEditClubItemForm,
     openReceiptForm,
     pendingChecklistId,
     resetFilters,

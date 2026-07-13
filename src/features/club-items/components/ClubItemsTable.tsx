@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, PackageCheck, PencilLine, Truck } from "lucide-react";
+import { PackageCheck, PencilLine } from "lucide-react";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -26,9 +26,7 @@ import type { ClubItem, ClubItemChecklistEntry } from "../types";
 type ClubItemsTableProps = {
   clubItems: ClubItem[];
   onConfirmReceipt: (clubItem: ClubItem) => void;
-  onEditNote: (clubItem: ClubItem) => void;
-  onEditQuantity: (clubItem: ClubItem) => void;
-  onEditSuppliers: (clubItem: ClubItem) => void;
+  onEditClubItem: (clubItem: ClubItem) => void;
   onToggleChecklist: (checklist: ClubItemChecklistEntry, nextValue: boolean) => void;
   pendingChecklistId: number | null;
   selectedCategoryName?: string;
@@ -38,9 +36,7 @@ type ClubItemsTableProps = {
 export function ClubItemsTable({
   clubItems,
   onConfirmReceipt,
-  onEditNote,
-  onEditQuantity,
-  onEditSuppliers,
+  onEditClubItem,
   onToggleChecklist,
   pendingChecklistId,
   selectedCategoryName,
@@ -143,30 +139,14 @@ export function ClubItemsTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex min-w-56 flex-wrap gap-2">
+                    <div className="flex min-w-48 flex-wrap gap-2">
                       <Button
-                        onClick={() => onEditQuantity(clubItem)}
+                        onClick={() => onEditClubItem(clubItem)}
                         size="sm"
                         variant="outline"
                       >
                         <PencilLine className="size-3.5" />
-                        تعديل الكمية
-                      </Button>
-                      <Button
-                        onClick={() => onEditNote(clubItem)}
-                        size="sm"
-                        variant="outline"
-                      >
-                        <FileText className="size-3.5" />
-                        تعديل الملاحظة
-                      </Button>
-                      <Button
-                        onClick={() => onEditSuppliers(clubItem)}
-                        size="sm"
-                        variant="outline"
-                      >
-                        <Truck className="size-3.5" />
-                        تعديل الموردين
+                        تعديل البيانات
                       </Button>
                       <Button
                         disabled={isReceiptDisabled}
