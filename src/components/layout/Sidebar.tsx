@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, Building2 } from "lucide-react";
+import { Building2, ChevronLeft, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -12,7 +12,6 @@ import { ROUTES } from "@/constants/routes";
 import { useDashboardInsights } from "@/hooks/useDashboardInsights";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
-import { selectSidebarOpen } from "@/store/selectors/dashboardSelectors";
 
 type SidebarProps = {
   isMobileOpen: boolean;
@@ -66,7 +65,7 @@ function SidebarContent({
                 />
               }
             >
-              <ChevronLeft className="size-4" />
+              <X className="size-4" />
             </DialogClose>
           ) : null}
         </div>
@@ -145,7 +144,7 @@ function SidebarContent({
 }
 
 export function Sidebar({ isMobileOpen, onMobileOpenChange }: SidebarProps) {
-  const isDesktopExpanded = useAppSelector(selectSidebarOpen);
+  const [isDesktopHovered, setIsDesktopHovered] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -160,11 +159,13 @@ export function Sidebar({ isMobileOpen, onMobileOpenChange }: SidebarProps) {
     <>
       <aside
         className={cn(
-          "sticky top-0 hidden h-screen shrink-0 self-start overflow-y-auto border-l border-white/60 bg-[linear-gradient(180deg,rgba(248,250,252,0.94),rgba(239,244,244,0.88))] backdrop-blur xl:flex xl:flex-col",
-          isDesktopExpanded ? "xl:w-78" : "xl:w-24"
+          "sticky top-0 hidden h-screen shrink-0 self-start overflow-y-auto border-l border-white/60 bg-[linear-gradient(180deg,rgba(248,250,252,0.94),rgba(239,244,244,0.88))] backdrop-blur transition-[width] duration-200 ease-out xl:flex xl:flex-col",
+          isDesktopHovered ? "xl:w-78" : "xl:w-24"
         )}
+        onMouseEnter={() => setIsDesktopHovered(true)}
+        onMouseLeave={() => setIsDesktopHovered(false)}
       >
-        <SidebarContent isExpanded={isDesktopExpanded} />
+        <SidebarContent isExpanded={isDesktopHovered} />
       </aside>
 
       <Dialog open={isMobileOpen} onOpenChange={onMobileOpenChange}>

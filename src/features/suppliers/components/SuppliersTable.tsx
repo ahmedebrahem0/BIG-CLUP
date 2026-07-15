@@ -1,10 +1,19 @@
 "use client";
 
-import { Edit3, ExternalLink, FileText, Trash2, Truck } from "lucide-react";
+import { useState } from "react";
+
+import { Edit3, Ellipsis, ExternalLink, FileText, Trash2, Truck } from "lucide-react";
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Card,
   CardContent,
@@ -57,6 +66,8 @@ export function SuppliersTable({
   searchValue,
   suppliers,
 }: SuppliersTableProps) {
+  const [rejectionReasonSupplier, setRejectionReasonSupplier] = useState<Supplier | null>(null);
+
   if (!suppliers.length) {
     return (
       <EmptyState
@@ -73,7 +84,8 @@ export function SuppliersTable({
   }
 
   return (
-    <Card className="rounded-[2rem] border-white/80 bg-white/84 shadow-[0_30px_70px_-52px_rgba(15,23,42,0.36)]">
+    <>
+      <Card className="rounded-[2rem] border-white/80 bg-white/84 shadow-[0_30px_70px_-52px_rgba(15,23,42,0.36)]">
       <CardHeader>
         <CardTitle>سجل الموردين</CardTitle>
         <CardDescription>
@@ -108,9 +120,19 @@ export function SuppliersTable({
                       <div className="min-w-0 space-y-1">
                         <p className="font-medium text-foreground">{supplier.name}</p>
                         {supplier.rejection_reason ? (
-                          <p className="text-xs leading-5 text-red-700">
-                            سبب الرفض: {supplier.rejection_reason}
-                          </p>
+                          <button
+                            className="group/reason block max-w-full rounded-xl bg-red-50 px-2 py-1 text-right text-xs leading-5 text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+                            onClick={() => setRejectionReasonSupplier(supplier)}
+                            type="button"
+                          >
+                            <span className="line-clamp-2 break-words">
+                              سبب الرفض: {supplier.rejection_reason}
+                            </span>
+                            <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-red-800">
+                              <Ellipsis className="size-3.5" />
+                              عرض السبب كامل
+                            </span>
+                          </button>
                         ) : (
                           <p className="text-xs text-muted-foreground">Supplier Resource</p>
                         )}
@@ -179,6 +201,32 @@ export function SuppliersTable({
           </TableBody>
         </Table>
       </CardContent>
-    </Card>
+      </Card>
+
+      <Dialog
+        open={Boolean(rejectionReasonSupplier)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRejectionReasonSupplier(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-2xl rounded-[2rem] border border-white/70 bg-white/95 p-0 shadow-[0_30px_80px_-46px_rgba(15,23,42,0.45)]" dir="rtl">
+          <DialogHeader className="border-b border-border/70 px-6 pt-6 pb-4">
+            <DialogTitle className="text-xl font-semibold text-foreground">سبب الرفض</DialogTitle>
+            <DialogDescription>
+              {rejectionReasonSupplier
+                ? `المورد: ${rejectionReasonSupplier.name}`
+                : "تفاصيل سبب الرفض"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[55dvh] overflow-y-auto px-6 py-5">
+            <p className="whitespace-pre-wrap break-words rounded-2xl bg-red-50 p-4 text-sm leading-8 text-red-800">
+              {rejectionReasonSupplier?.rejection_reason}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

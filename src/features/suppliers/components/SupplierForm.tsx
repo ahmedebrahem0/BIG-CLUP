@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 import { supplierSchema, type SupplierSchemaValues } from "../schema/supplier.schema";
 import type { SupplierFormValues } from "../types";
@@ -194,10 +195,10 @@ export function SupplierForm({
 
                 <div className="space-y-2">
                   <Label htmlFor="rejection-reason">سبب الرفض</Label>
-                  <Input
+                  <Textarea
                     id="rejection-reason"
-                    className="h-12 rounded-2xl bg-background/70"
-                    placeholder="اختياري"
+                    className="min-h-28 resize-y rounded-2xl bg-background/70"
+                    placeholder="اكتب تفاصيل سبب الرفض إن وجدت"
                     {...register("rejection_reason")}
                   />
                 </div>

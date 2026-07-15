@@ -71,7 +71,7 @@ export function SuppliersPageContent() {
                 من هنا يتم ضبط أسماء الموردين المعتمدين داخل النظام لاستخدامهم في
                 العمليات التشغيلية وربطهم بالأصناف لاحقًا.
               </p>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl bg-secondary p-4">
                   <p className="text-xs text-muted-foreground">إجمالي الموردين</p>
                   <p className="mt-2 text-2xl font-semibold text-foreground">
@@ -84,7 +84,7 @@ export function SuppliersPageContent() {
                     {suppliers.length}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-secondary p-4">
+                <div className="col-span-2 rounded-2xl bg-secondary p-4 sm:col-span-1">
                   <p className="text-xs text-muted-foreground">دور الصفحة</p>
                   <p className="mt-2 text-sm font-semibold text-foreground">
 بيانات الموردين وحالة الاعتماد

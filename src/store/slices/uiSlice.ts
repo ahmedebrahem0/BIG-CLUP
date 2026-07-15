@@ -5,7 +5,7 @@ type UiState = {
 };
 
 const initialState: UiState = {
-  sidebarOpen: true,
+  sidebarOpen: false,
 };
 
 const uiSlice = createSlice({

@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   Bell,
   Menu,
-  PanelRightClose,
-  PanelRightOpen,
   Search,
   LogOut,
   Settings2,
@@ -27,10 +25,8 @@ import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 import { useDashboardInsights } from "@/hooks/useDashboardInsights";
 import { baseApi } from "@/store/baseApi";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { selectSidebarOpen } from "@/store/selectors/dashboardSelectors";
+import { useAppDispatch } from "@/store/hooks";
 import { clearCredentials } from "@/features/auth/authSlice";
-import { toggleSidebar } from "@/store/slices/uiSlice";
 
 type HeaderProps = {
   isMobileSidebarOpen: boolean;
@@ -43,7 +39,6 @@ export function Header({
 }: HeaderProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const isSidebarOpen = useAppSelector(selectSidebarOpen);
   const { notifications, unreadCount } = useDashboardInsights();
 
   function handleLogout() {
@@ -64,20 +59,6 @@ export function Header({
             variant="outline"
           >
             {isMobileSidebarOpen ? <X className="size-4" /> : <Menu className="size-4" />}
-          </Button>
-
-          <Button
-            aria-label="Toggle sidebar"
-            className="hidden xl:inline-flex"
-            onClick={() => dispatch(toggleSidebar())}
-            size="icon"
-            variant="outline"
-          >
-            {isSidebarOpen ? (
-              <PanelRightClose className="size-4" />
-            ) : (
-              <PanelRightOpen className="size-4" />
-            )}
           </Button>
 
           <div>
