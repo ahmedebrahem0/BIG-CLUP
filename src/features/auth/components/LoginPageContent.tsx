@@ -153,7 +153,7 @@ export function LoginPageContent() {
                 </div>
 
                 <Button className="h-12 w-full text-base" disabled={loginState.isLoading} type="submit">
-                  {loginState.isLoading ? "جاري الدخول..." : "دخول"}
+                  {loginState.isLoading ? "جاري الدخول..." : "تسجيل الدخول"}
                 </Button>
               </form>
             </div>
