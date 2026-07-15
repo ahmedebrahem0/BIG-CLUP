@@ -1,8 +1,9 @@
 "use client";
 
-import { Edit3, Trash2, Truck } from "lucide-react";
+import { Edit3, ExternalLink, FileText, Trash2, Truck } from "lucide-react";
 
 import { EmptyState } from "@/components/common/EmptyState";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import type { Supplier } from "../types";
+import type { Supplier, SupplierStatus } from "../types";
 
 type SuppliersTableProps = {
   onCreate: () => void;
@@ -29,6 +30,25 @@ type SuppliersTableProps = {
   searchValue: string;
   suppliers: Supplier[];
 };
+
+const statusMeta: Record<SupplierStatus, { label: string; className: string }> = {
+  pending: {
+    label: "قيد المراجعة",
+    className: "bg-amber-100 text-amber-800 hover:bg-amber-100",
+  },
+  approved: {
+    label: "معتمد",
+    className: "bg-emerald-100 text-emerald-800 hover:bg-emerald-100",
+  },
+  rejected: {
+    label: "مرفوض",
+    className: "bg-red-100 text-red-800 hover:bg-red-100",
+  },
+};
+
+function getStatusMeta(status: SupplierStatus) {
+  return statusMeta[status] ?? statusMeta.pending;
+}
 
 export function SuppliersTable({
   onCreate,
@@ -57,59 +77,105 @@ export function SuppliersTable({
       <CardHeader>
         <CardTitle>سجل الموردين</CardTitle>
         <CardDescription>
-          قائمة مباشرة من الـ API مع إمكانيات البحث والتعديل والحذف.
+          قائمة مباشرة من SupplierListView مع بيانات التواصل والحالة والمستندات.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Table>
+      <CardContent className="overflow-x-auto">
+        <Table className="min-w-[1180px] table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead>المعرف</TableHead>
-              <TableHead>اسم المورد</TableHead>
-              <TableHead>العمليات</TableHead>
+              <TableHead className="w-20">المعرف</TableHead>
+              <TableHead className="w-[20%]">بيانات المورد</TableHead>
+              <TableHead className="w-[16%]">السجل والضريبة</TableHead>
+              <TableHead className="w-[18%]">مسؤول التواصل</TableHead>
+              <TableHead className="w-[11%]">الحالة</TableHead>
+              <TableHead className="w-[13%]">المستندات</TableHead>
+              <TableHead className="w-[14%]">العمليات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {suppliers.map((supplier) => (
-              <TableRow key={supplier.id}>
-                <TableCell className="font-medium">#{supplier.id}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Truck className="size-4" />
+            {suppliers.map((supplier) => {
+              const status = getStatusMeta(supplier.status);
+
+              return (
+                <TableRow key={supplier.id}>
+                  <TableCell className="font-medium text-right align-top">#{supplier.id}</TableCell>
+                  <TableCell className="text-right align-top whitespace-normal">
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Truck className="size-4" />
+                      </div>
+                      <div className="min-w-0 space-y-1">
+                        <p className="font-medium text-foreground">{supplier.name}</p>
+                        {supplier.rejection_reason ? (
+                          <p className="text-xs leading-5 text-red-700">
+                            سبب الرفض: {supplier.rejection_reason}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Supplier Resource</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium text-foreground">{supplier.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        Supplier Resource
+                  </TableCell>
+                  <TableCell className="text-right align-top whitespace-normal text-sm leading-6">
+                    <div className="space-y-1">
+                      <p>السجل: {supplier.commercial_register}</p>
+                      <p className="text-muted-foreground">الضريبة: {supplier.tax_card}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right align-top whitespace-normal text-sm leading-6">
+                    <div className="space-y-1">
+                      <p className="font-medium text-foreground">{supplier.contact_person}</p>
+                      <p>{supplier.contact_phone}</p>
+                      <p className="text-muted-foreground">{supplier.contact_title}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right align-top">
+                    <Badge className={status.className}>{status.label}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right align-top">
+                    {supplier.documents ? (
+                      <a
+                        className="inline-flex h-8 items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted"
+                        href={supplier.documents}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <ExternalLink className="size-3.5" />
+                        فتح الملف
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                        <FileText className="size-4" />
+                        لا يوجد
                       </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right align-top">
+                    <div className="flex flex-wrap items-center justify-start gap-2">
+                      <Button
+                        type="button"
+                        onClick={() => onEdit(supplier)}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <Edit3 className="size-3.5" />
+                        تعديل
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => onDelete(supplier)}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        <Trash2 className="size-3.5" />
+                        حذف
+                      </Button>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      onClick={() => onEdit(supplier)}
-                      size="sm"
-                      variant="outline"
-                    >
-                      <Edit3 className="size-3.5" />
-                      تعديل
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => onDelete(supplier)}
-                      size="sm"
-                      variant="destructive"
-                    >
-                      <Trash2 className="size-3.5" />
-                      حذف
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>

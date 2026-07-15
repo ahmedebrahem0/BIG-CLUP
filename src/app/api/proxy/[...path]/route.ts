@@ -23,15 +23,14 @@ function buildTargetUrl(path: string[], request: NextRequest) {
 async function forwardRequest(
   targetUrl: URL,
   method: string,
-  contentType: string | null,
-  body?: string
+  headers: http.OutgoingHttpHeaders,
+  bodyBuffer?: Buffer
 ) {
   const transport = targetUrl.protocol === "https:" ? https : http;
-  const bodyBuffer = body ? Buffer.from(body, "utf8") : undefined;
 
   return new Promise<{
     statusCode: number;
-    body: string;
+    body: Buffer;
     contentType: string | null;
   }>((resolve, reject) => {
     const req = transport.request(
@@ -39,7 +38,7 @@ async function forwardRequest(
       {
         method,
         headers: {
-          ...(contentType ? { "content-type": contentType } : {}),
+          ...headers,
           ...(bodyBuffer ? { "content-length": String(bodyBuffer.byteLength) } : {}),
           "ngrok-skip-browser-warning": "true",
         },
@@ -57,7 +56,7 @@ async function forwardRequest(
 
           resolve({
             statusCode: res.statusCode ?? 500,
-            body: Buffer.concat(chunks).toString("utf8"),
+            body: Buffer.concat(chunks),
             contentType: Array.isArray(responseContentType)
               ? responseContentType[0] ?? null
               : responseContentType ?? null,
@@ -80,15 +79,19 @@ async function proxyRequest(request: NextRequest, path: string[]) {
   try {
     const targetUrl = buildTargetUrl(path, request);
     const contentType = request.headers.get("content-type");
+    const authorization = request.headers.get("authorization");
     const rawBody =
       request.method === "GET" || request.method === "HEAD"
         ? undefined
-        : await request.text();
+        : Buffer.from(await request.arrayBuffer());
 
     const response = await forwardRequest(
       targetUrl,
       request.method,
-      contentType,
+      {
+        ...(contentType ? { "content-type": contentType } : {}),
+        ...(authorization ? { authorization } : {}),
+      },
       rawBody
     );
 
@@ -99,7 +102,7 @@ async function proxyRequest(request: NextRequest, path: string[]) {
       });
     }
 
-    return new NextResponse(response.body, {
+    return new NextResponse(new Uint8Array(response.body), {
       status: response.statusCode,
       headers: response.contentType ? { "content-type": response.contentType } : undefined,
     });

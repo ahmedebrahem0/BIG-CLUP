@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, Sparkles } from "lucide-react";
+import { ChevronLeft, Building2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
+import { ROUTES } from "@/constants/routes";
 import { useDashboardInsights } from "@/hooks/useDashboardInsights";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
@@ -30,13 +32,19 @@ function SidebarContent({
 }: SidebarContentProps) {
   const pathname = usePathname();
   const { badgesByRoute } = useDashboardInsights();
-
+  const authState = useAppSelector((state) => state.auth);
+  const userRole = authState.user?.role;
+  const visibleNavigationItems = !authState.isHydrated
+    ? []
+    : userRole === "supplier"
+      ? siteConfig.navigation.filter((item) => item.href === ROUTES.suppliers)
+      : siteConfig.navigation;
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-black/5 px-5 py-6">
         <div className={cn("flex items-center gap-3", !isExpanded && "justify-center")}>
           <div className="flex size-12 items-center justify-center rounded-2xl bg-[radial-gradient(circle_at_top,rgba(43,108,94,0.24),rgba(43,108,94,0.1),transparent)] text-primary ring-1 ring-primary/15">
-            <Sparkles className="size-5" />
+            <Building2 className="size-5" />
           </div>
           {isExpanded ? (
             <div className="flex-1 space-y-1">
@@ -65,7 +73,7 @@ function SidebarContent({
       </div>
 
       <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-5">
-        {siteConfig.navigation.map((item) => {
+        {visibleNavigationItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
           const badgeCount = badgesByRoute[item.href] ?? 0;
@@ -127,7 +135,7 @@ function SidebarContent({
             </>
           ) : (
             <div className="flex justify-center">
-              <Sparkles className="size-4 text-primary" />
+              <Building2 className="size-4 text-primary" />
             </div>
           )}
         </div>
@@ -138,6 +146,15 @@ function SidebarContent({
 
 export function Sidebar({ isMobileOpen, onMobileOpenChange }: SidebarProps) {
   const isDesktopExpanded = useAppSelector(selectSidebarOpen);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>

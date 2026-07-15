@@ -1,43 +1,13 @@
+$ next dev --webpack
 ▲ Next.js 16.2.10 (webpack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.1.47:3000
 - Environments: .env.local
-✓ Ready in 1115ms
+✓ Ready in 1054ms
 
-○ Compiling /clubs ...
- GET /clubs 200 in 11.6s (next.js: 10.8s, application-code: 795ms)
-API proxy error TypeError: fetch failed
-    at async proxyRequest (src\app\api\proxy\[...path]\route.ts:28:22)
-  26 |       : await request.text();
-  27 |
-> 28 |     const response = await fetch(targetUrl, {
-     |                      ^
-  29 |       method: request.method,
-  30 |       headers: {
-  31 |         ...(contentType ? { "content-type": contentType } : {}), {
-  [cause]: Error: unable to verify the first certificate
-      at ignore-listed frames {
-    code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
-  }
-}
- GET /api/proxy/items/clubs 502 in 14.1s (next.js: 13.6s, application-code: 512ms)
-API proxy error TypeError: fetch failed
-    at async proxyRequest (src\app\api\proxy\[...path]\route.ts:28:22)
-  26 |       : await request.text();
-  27 |
-> 28 |     const response = await fetch(targetUrl, {
-     |                      ^
-  29 |       method: request.method,
-  30 |       headers: {
-  31 |         ...(contentType ? { "content-type": contentType } : {}), {
-  [cause]: Error: unable to verify the first certificate
-      at ignore-listed frames {
-    code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
-  }
-}
- GET /api/proxy/items/clubs 502 in 550ms (next.js: 21ms, application-code: 529ms)
-(node:20736) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
-(Use `node --trace-warnings ...` to show where the warning was created)
- GET /clubs 200 in 2.0s (next.js: 1456ms, application-code: 572ms)
- GET /api/proxy/items/clubs 200 in 2.3s (next.js: 1429ms, application-code: 840ms)
- GET /api/proxy/items/clubs 200 in 1133ms (next.js: 431ms, application-code: 703ms)
+○ Compiling / ...
+ GET / 200 in 9.8s (next.js: 8.9s, application-code: 909ms)
+ GET / 200 in 144ms (next.js: 12ms, application-code: 132ms)
+ GET / 200 in 178ms (next.js: 7ms, application-code: 170ms)
+ GET / 200 in 175ms (next.js: 7ms, application-code: 168ms)
+ GET / 200 in 831ms (next.js: 308ms, application-code: 523ms)

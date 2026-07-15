@@ -4,8 +4,9 @@ import { useDeferredValue, useState } from "react";
 import { toast } from "sonner";
 
 import { handleApiError } from "@/lib/api/handleApiError";
+import { useAppSelector } from "@/store/hooks";
 
-import { mapSupplierToFormValues } from "../api";
+import { mapSupplierFormToFormData, mapSupplierToFormValues } from "../api";
 import {
   useCreateSupplierMutation,
   useDeleteSupplierMutation,
@@ -21,6 +22,8 @@ export function useSuppliers() {
   const [supplierPendingDelete, setSupplierPendingDelete] =
     useState<Supplier | null>(null);
   const deferredSearchValue = useDeferredValue(searchValue);
+  const userRole = useAppSelector((state) => state.auth.user?.role);
+  const canManageSupplierStatus = userRole !== "supplier";
 
   const suppliersQuery = useGetSuppliersQuery();
   const [createSupplier, createSupplierState] = useCreateSupplierMutation();
@@ -31,7 +34,19 @@ export function useSuppliers() {
   const normalizedQuery = deferredSearchValue.trim().toLowerCase();
   const filteredSuppliers = normalizedQuery
     ? suppliers.filter((supplier) =>
-        supplier.name.toLowerCase().includes(normalizedQuery)
+        [
+          supplier.name,
+          supplier.commercial_register,
+          supplier.tax_card,
+          supplier.contact_person,
+          supplier.contact_phone,
+          supplier.contact_title,
+          supplier.status,
+          supplier.rejection_reason ?? "",
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedQuery)
       )
     : suppliers;
 
@@ -73,16 +88,20 @@ export function useSuppliers() {
   }
 
   async function submitSupplier(values: SupplierFormValues) {
+    const body = mapSupplierFormToFormData(values, {
+      includeAdminFields: canManageSupplierStatus,
+    });
+
     try {
       if (supplierBeingEdited) {
         await updateSupplier({
           id: supplierBeingEdited.id,
-          body: values,
+          body,
         }).unwrap();
 
         toast.success("تم تحديث المورد بنجاح.");
       } else {
-        await createSupplier(values).unwrap();
+        await createSupplier(body).unwrap();
         toast.success("تمت إضافة المورد بنجاح.");
       }
 
@@ -109,6 +128,7 @@ export function useSuppliers() {
   return {
     allSuppliersCount: suppliers.length,
     cancelDeleteSupplier,
+    canManageSupplierStatus,
     closeForm,
     confirmDeleteSupplier,
     deleteSupplierState,

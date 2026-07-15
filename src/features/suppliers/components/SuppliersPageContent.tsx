@@ -23,6 +23,7 @@ export function SuppliersPageContent() {
   const {
     allSuppliersCount,
     cancelDeleteSupplier,
+    canManageSupplierStatus,
     confirmDeleteSupplier,
     formDefaultValues,
     formMode,
@@ -86,7 +87,7 @@ export function SuppliersPageContent() {
                 <div className="rounded-2xl bg-secondary p-4">
                   <p className="text-xs text-muted-foreground">دور الصفحة</p>
                   <p className="mt-2 text-sm font-semibold text-foreground">
-                    تعريف الموردين الأساسيين للمشروع
+بيانات الموردين وحالة الاعتماد
                   </p>
                 </div>
               </div>
@@ -100,11 +101,11 @@ export function SuppliersPageContent() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <div className="rounded-2xl bg-white/80 p-4 leading-7 text-foreground">
-                كل سجل يمثل موردًا واحدًا يمكن إضافته أو تعديله أو حذفه من النظام.
+كل سجل يمثل موردًا كاملًا من واجهة SupplierListView، مع دعم رفع مستند PDF اختياري.
               </div>
               <div className="flex items-center gap-2 rounded-2xl bg-white/70 px-4 py-3 text-foreground">
                 <Truck className="size-4 text-primary" />
-                صفحة سريعة للحفاظ على قائمة الموردين المعتمدين.
+طلبات الموردين محمية بتوكن تسجيل الدخول وتُدار حسب دور المستخدم.
               </div>
             </CardContent>
           </Card>
@@ -148,6 +149,7 @@ export function SuppliersPageContent() {
       <SupplierForm
         defaultValues={formDefaultValues}
         isOpen={isFormOpen}
+        canManageStatus={canManageSupplierStatus}
         isSubmitting={isSubmitting}
         mode={formMode}
         onOpenChange={handleFormOpenChange}

@@ -1,4 +1,5 @@
 export const API_ENDPOINTS = {
+  login: "/items/login/",
   clubs: "/items/clubs/",
   categories: "/items/categories/",
   checklists: "/items/checklists/",
@@ -17,8 +18,8 @@ export const API_ENDPOINTS = {
     `/items/clubs/${clubId}/add-item/`,
 
   updateClubChecklistStatus: (checklistEntryId: number) =>
-    `/items/checklists/${checklistEntryId}/update/`,
+    `/items/club-checklists/${checklistEntryId}/update/`,
 
-  updateItemChecklistStatus: (checklistEntryId: number) =>
-    `/items/items/checklists/${checklistEntryId}/update/`,
+  updateItemChecklistStatus: (itemId: number) =>
+    `/items/items/${itemId}/checklists/update/`,
 } as const;

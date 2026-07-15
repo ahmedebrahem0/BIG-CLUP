@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   Menu,
   PanelRightClose,
   PanelRightOpen,
   Search,
+  LogOut,
   Settings2,
   X,
 } from "lucide-react";
@@ -21,10 +23,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 import { useDashboardInsights } from "@/hooks/useDashboardInsights";
+import { baseApi } from "@/store/baseApi";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { selectSidebarOpen } from "@/store/selectors/dashboardSelectors";
+import { clearCredentials } from "@/features/auth/authSlice";
 import { toggleSidebar } from "@/store/slices/uiSlice";
 
 type HeaderProps = {
@@ -37,8 +42,15 @@ export function Header({
   onMobileMenuToggle,
 }: HeaderProps) {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const isSidebarOpen = useAppSelector(selectSidebarOpen);
   const { notifications, unreadCount } = useDashboardInsights();
+
+  function handleLogout() {
+    dispatch(clearCredentials());
+    dispatch(baseApi.util.resetApiState());
+    router.replace(ROUTES.login);
+  }
 
   return (
     <header className="sticky top-0 z-20 border-b border-white/60 bg-background/80 backdrop-blur-xl">
@@ -88,6 +100,10 @@ export function Header({
           </div>
 
           <div className="flex items-center gap-2">
+            <Button className="h-11 gap-2 rounded-2xl px-4" onClick={handleLogout} type="button" variant="outline">
+              <LogOut className="size-4" />
+              <span>تسجيل الخروج</span>
+            </Button>
             {/* <DropdownMenu>
               <DropdownMenuTrigger
                 render={<Button className="relative" size="icon" variant="outline" />}
