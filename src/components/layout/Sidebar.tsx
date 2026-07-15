@@ -84,6 +84,7 @@ function SidebarContent({
               onClick={onNavigate}
               className={cn(
                 "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all",
+                !isExpanded && "justify-center px-2",
                 isActive
                   ? "bg-white text-foreground shadow-[0_12px_40px_-28px_rgba(15,23,42,0.55)] ring-1 ring-black/5"
                   : "text-muted-foreground hover:bg-white/70 hover:text-foreground"
@@ -91,11 +92,16 @@ function SidebarContent({
             >
               <span
                 className={cn(
-                  "flex size-10 items-center justify-center rounded-xl transition-colors",
+                  "relative flex size-10 items-center justify-center rounded-xl transition-colors",
                   isActive ? "bg-primary/10 text-primary" : "bg-transparent text-current"
                 )}
               >
                 <Icon className="size-[18px]" />
+                {!isExpanded && badgeCount > 0 ? (
+                  <span className="absolute -top-1 -left-1 flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary-foreground shadow-sm ring-2 ring-white">
+                    {badgeCount}
+                  </span>
+                ) : null}
               </span>
               {isExpanded ? (
                 <>
@@ -116,10 +122,6 @@ function SidebarContent({
                     />
                   </div>
                 </>
-              ) : badgeCount > 0 ? (
-                <span className="absolute top-2 left-2 flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
-                  {badgeCount}
-                </span>
               ) : null}
             </Link>
           );
