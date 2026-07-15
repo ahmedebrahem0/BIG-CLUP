@@ -54,7 +54,7 @@ export function useClubItemsWorkspace() {
 
   const clubsQuery = useGetClubsQuery();
   const itemsQuery = useGetItemsQuery();
-  const suppliersQuery = useGetSuppliersQuery();
+  const suppliersQuery = useGetSuppliersQuery({ status: "approved" });
 
   const numericClubId = selectedClubId ? Number(selectedClubId) : null;
   const numericCategoryId = selectedCategoryId ? Number(selectedCategoryId) : null;
@@ -214,7 +214,7 @@ export function useClubItemsWorkspace() {
 
   const itemsForSelectedCategory = useMemo(() => {
     if (!numericCategoryId) {
-      return [] as Item[];
+      return items;
     }
 
     return items.filter((item) => item.category === numericCategoryId);

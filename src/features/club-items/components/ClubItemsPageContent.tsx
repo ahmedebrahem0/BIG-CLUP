@@ -128,11 +128,11 @@ export function ClubItemsPageContent() {
                 إضافة صنف للنادي
               </div>
               <p className="text-sm leading-7 text-muted-foreground">
-                بعد اختيار النادي والفئة، يمكن ربط صنف جديد فقط. تعديل بيانات الصنف يتم من زر تعديل البيانات داخل الصف الموجود.
+                بعد اختيار النادي يمكن ربط صنف جديد، واختيار الفئة يساعدك على تضييق قائمة الأصناف. تعديل بيانات الصنف يتم من زر تعديل البيانات داخل الصف الموجود.
               </p>
               <Button
                 className="mt-4 h-11 w-full rounded-2xl"
-                disabled={!numericClubId || !numericCategoryId}
+                disabled={!numericClubId}
                 onClick={openCreateForm}
               >
                 <PackagePlus className="size-4" />

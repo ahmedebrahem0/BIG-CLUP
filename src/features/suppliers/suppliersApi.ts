@@ -2,12 +2,17 @@ import { API_ENDPOINTS } from "@/constants/api-endpoints";
 import { QUERY_TAGS } from "@/constants/query-tags";
 import { baseApi } from "@/store/baseApi";
 
-import type { Supplier, SupplierPayload } from "./types";
+import type { Supplier, SupplierPayload, SupplierStatus } from "./types";
+
+type GetSuppliersArg = { status?: SupplierStatus };
 
 export const suppliersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getSuppliers: builder.query<Supplier[], void>({
-      query: () => API_ENDPOINTS.suppliers,
+    getSuppliers: builder.query<Supplier[], GetSuppliersArg | void>({
+      query: (args) =>
+        args?.status
+          ? `${API_ENDPOINTS.suppliers}?status=${args.status}`
+          : API_ENDPOINTS.suppliers,
       providesTags: (result) =>
         result
           ? [
