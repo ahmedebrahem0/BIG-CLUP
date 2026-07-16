@@ -141,8 +141,8 @@ export function SuppliersTable({
                   </TableCell>
                   <TableCell className="text-right align-top whitespace-normal text-sm leading-6">
                     <div className="space-y-1">
-                      <p>السجل: {supplier.commercial_register}</p>
-                      <p className="text-muted-foreground">الضريبة: {supplier.tax_card}</p>
+                      <p>السجل التجاري: {supplier.commercial_register}</p>
+                      <p className="text-muted-foreground">البطاقة الضريبية: {supplier.tax_card}</p>
                     </div>
                   </TableCell>
                   <TableCell className="text-right align-top whitespace-normal text-sm leading-6">

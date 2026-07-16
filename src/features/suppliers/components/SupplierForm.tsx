@@ -72,7 +72,7 @@ export function SupplierForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92dvh] max-w-3xl overflow-y-auto rounded-[2rem] border border-white/70 bg-white/95 p-0 shadow-[0_30px_80px_-46px_rgba(15,23,42,0.45)]" dir="rtl">
+      <DialogContent className="max-h-[92dvh] overflow-y-auto rounded-[2rem] border border-white/70 bg-white/95 p-0 shadow-[0_30px_80px_-46px_rgba(15,23,42,0.45)] md:w-[88vw] md:max-w-6xl xl:max-w-7xl" dir="rtl">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader className="px-6 pt-6">
             <DialogTitle className="text-xl font-semibold text-foreground">
@@ -183,7 +183,7 @@ export function SupplierForm({
                     }}
                   >
                     <SelectTrigger id="supplier-status" className="h-12 w-full rounded-2xl bg-background/70">
-                      <SelectValue placeholder="اختر الحالة" />
+                      <SelectValue placeholder="اختر الحالة">{statusLabels[statusValue]}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="pending">{statusLabels.pending}</SelectItem>

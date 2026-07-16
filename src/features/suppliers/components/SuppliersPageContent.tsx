@@ -105,7 +105,7 @@ export function SuppliersPageContent() {
               </div>
               <div className="flex items-center gap-2 rounded-2xl bg-white/70 px-4 py-3 text-foreground">
                 <Truck className="size-4 text-primary" />
-طلبات الموردين محمية بتوكن تسجيل الدخول وتُدار حسب دور المستخدم.
+طلبات الموردين محمية  وتُدار حسب دور المستخدم.
               </div>
             </CardContent>
           </Card>
