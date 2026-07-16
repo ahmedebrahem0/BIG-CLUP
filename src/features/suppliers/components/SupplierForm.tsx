@@ -222,7 +222,7 @@ export function SupplierForm({
               ) : (
                 <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                   <FileText className="size-4" />
-                  لا توجد ملفات محفوظة
+                  لا توجد ملفات محفوظة 
                 </span>
               )}
               <div className="space-y-3">
