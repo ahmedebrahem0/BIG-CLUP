@@ -36,6 +36,7 @@ export function SuppliersPageContent() {
     searchValue,
     setSearchValue,
     submitSupplier,
+    supplierBeingEdited,
     supplierPendingDelete,
     suppliers,
     suppliersQuery,
@@ -148,6 +149,7 @@ export function SuppliersPageContent() {
 
       <SupplierForm
         defaultValues={formDefaultValues}
+        existingDocuments={supplierBeingEdited?.documents ?? null}
         isOpen={isFormOpen}
         canManageStatus={canManageSupplierStatus}
         isSubmitting={isSubmitting}

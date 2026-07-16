@@ -45,10 +45,9 @@ export function mapSupplierFormToFormData(
   formData.set("contact_phone", values.contact_phone.trim());
   formData.set("contact_title", values.contact_title.trim());
 
-  const documentFile = values.documents?.item(0);
-  if (documentFile) {
-    formData.set("documents", documentFile);
-  }
+  values.documents?.forEach((documentFile) => {
+    formData.append("documents", documentFile);
+  });
 
   if (options.includeAdminFields) {
     formData.set("status", values.status);

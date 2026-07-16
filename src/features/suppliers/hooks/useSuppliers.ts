@@ -143,6 +143,7 @@ export function useSuppliers() {
     searchValue,
     setSearchValue,
     submitSupplier,
+    supplierBeingEdited,
     supplierPendingDelete,
     suppliers: filteredSuppliers,
     suppliersQuery,

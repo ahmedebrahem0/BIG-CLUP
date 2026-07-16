@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle } from "lucide-react";
+import { ExternalLink, FileText, LoaderCircle, Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,11 +26,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { supplierSchema, type SupplierSchemaValues } from "../schema/supplier.schema";
-import type { SupplierFormValues } from "../types";
+import type { Supplier, SupplierDocument, SupplierFormValues } from "../types";
 
 type SupplierFormProps = {
   canManageStatus: boolean;
   defaultValues: SupplierFormValues;
+  existingDocuments?: Supplier["documents"];
   isOpen: boolean;
   isSubmitting?: boolean;
   mode: "create" | "edit";
@@ -44,15 +45,30 @@ const statusLabels = {
   rejected: "مرفوض",
 } as const;
 
+function normalizeSupplierDocuments(documents: Supplier["documents"]): SupplierDocument[] {
+  if (!documents) {
+    return [];
+  }
+
+  if (Array.isArray(documents)) {
+    return documents.filter((document) => Boolean(document.file));
+  }
+
+  return [{ id: 0, file: documents }];
+}
+
 export function SupplierForm({
   canManageStatus,
   defaultValues,
+  existingDocuments = null,
   isOpen,
   isSubmitting = false,
   mode,
   onOpenChange,
   onSubmit,
 }: SupplierFormProps) {
+  const [documentInputIds, setDocumentInputIds] = useState([0]);
+  const [documentFiles, setDocumentFiles] = useState<Array<File | null>>([null]);
   const {
     formState: { errors },
     handleSubmit,
@@ -65,9 +81,37 @@ export function SupplierForm({
     defaultValues,
   });
   const statusValue = watch("status");
+  const currentDocuments = normalizeSupplierDocuments(existingDocuments);
+  const canAddDocumentInput = documentFiles.length > 0 && documentFiles.every(Boolean);
+
+  function syncDocumentFiles(nextFiles: Array<File | null>) {
+    setDocumentFiles(nextFiles);
+    setValue("documents", nextFiles.filter((file): file is File => Boolean(file)), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
+
+  function handleDocumentChange(index: number, file: File | null) {
+    syncDocumentFiles(documentFiles.map((currentFile, currentIndex) => (
+      currentIndex === index ? file : currentFile
+    )));
+  }
+
+  function addDocumentInput() {
+    setDocumentInputIds((currentIds) => [...currentIds, (currentIds.at(-1) ?? 0) + 1]);
+    setDocumentFiles((currentFiles) => [...currentFiles, null]);
+  }
+
+  function removeDocumentInput(index: number) {
+    setDocumentInputIds((currentIds) => currentIds.filter((_, currentIndex) => currentIndex !== index));
+    syncDocumentFiles(documentFiles.filter((_, currentIndex) => currentIndex !== index));
+  }
 
   useEffect(() => {
     reset(defaultValues);
+    setDocumentInputIds([0]);
+    setDocumentFiles([null]);
   }, [defaultValues, reset]);
 
   return (
@@ -158,15 +202,67 @@ export function SupplierForm({
               ) : null}
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="supplier-documents">ملف المستندات PDF</Label>
-              <Input
-                id="supplier-documents"
-                accept="application/pdf"
-                className="h-12 rounded-2xl bg-background/70 file:ml-4 file:border-0 file:bg-transparent file:text-sm file:font-medium"
-                type="file"
-                {...register("documents")}
-              />
+            <div className="space-y-3 md:col-span-2">
+              <Label htmlFor={`supplier-documents-${documentInputIds[0]}`}>ملفات المستندات PDF</Label>
+              {currentDocuments.length ? (
+                <div className="flex flex-wrap gap-2 rounded-2xl border border-border/70 bg-muted/30 p-3">
+                  {currentDocuments.map((document, index) => (
+                    <a
+                      key={`${document.id}-${document.file}`}
+                      className="inline-flex h-8 items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted"
+                      href={document.file}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <ExternalLink className="size-3.5" />
+                      ملف {index + 1}
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <FileText className="size-4" />
+                  لا توجد ملفات محفوظة
+                </span>
+              )}
+              <div className="space-y-3">
+                {documentInputIds.map((inputId, index) => (
+                  <div key={inputId} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <Input
+                      id={`supplier-documents-${inputId}`}
+                      accept="application/pdf"
+                      className="h-12 rounded-2xl bg-background/70 file:ml-4 file:border-0 file:bg-transparent file:text-sm file:font-medium"
+                      type="file"
+                      onChange={(event) => {
+                        handleDocumentChange(index, event.target.files?.item(0) ?? null);
+                      }}
+                    />
+                    {documentInputIds.length > 1 ? (
+                      <Button
+                        aria-label="حذف الملف"
+                        className="size-10 shrink-0 rounded-full"
+                        type="button"
+                        onClick={() => removeDocumentInput(index)}
+                        size="icon"
+                        variant="outline"
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+              {canAddDocumentInput ? (
+                <Button
+                  className="h-10 rounded-full px-4"
+                  type="button"
+                  onClick={addDocumentInput}
+                  variant="outline"
+                >
+                  <Plus className="size-4" />
+                  إضافة ملف آخر
+                </Button>
+              ) : null}
             </div>
 
             {canManageStatus ? (

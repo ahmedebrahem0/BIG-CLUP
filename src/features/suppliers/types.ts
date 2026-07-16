@@ -1,5 +1,10 @@
 export type SupplierStatus = "pending" | "approved" | "rejected";
 
+export type SupplierDocument = {
+  id: number;
+  file: string;
+};
+
 export type Supplier = {
   id: number;
   name: string;
@@ -8,7 +13,7 @@ export type Supplier = {
   contact_person: string;
   contact_phone: string;
   contact_title: string;
-  documents: string | null;
+  documents: SupplierDocument[] | string | null;
   status: SupplierStatus;
   rejection_reason: string | null;
 };
@@ -20,7 +25,7 @@ export type SupplierFormValues = {
   contact_person: string;
   contact_phone: string;
   contact_title: string;
-  documents?: FileList;
+  documents?: File[];
   status: SupplierStatus;
   rejection_reason: string;
 };
